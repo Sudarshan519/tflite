@@ -51,8 +51,8 @@ convertYUV420toImageColor(CameraImage image) async {
     final int uvRowStride = image.planes[1].bytesPerRow;
     final int? uvPixelStride = image.planes[1].bytesPerPixel;
 
-    print("uvRowStride: " + uvRowStride.toString());
-    print("uvPixelStride: " + uvPixelStride.toString());
+    // print("uvRowStride: " + uvRowStride.toString());
+    // print("uvPixelStride: " + uvPixelStride.toString());
 
     // imgLib -> Image package from https://pub.dartlang.org/packages/image
     var img = imglib.Image(width, height); // Create Image buffer

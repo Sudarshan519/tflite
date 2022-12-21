@@ -41,27 +41,40 @@ class MainController extends GetxController {
   var confidence = "".obs;
   var image = "".obs;
   var currentPage = 0.obs;
-  var pageController = PageController();
+  var pageController;
 
   ///images
-  ///
-  ///front
   var frontImage = "".obs;
   var backImage = "".obs;
   var tilted = "".obs;
   var selfie = "".obs;
-  // var frontImage = Uint8List(0).obs;
-
-  var frontCapturedImage = "".obs;
+  var frontImageByte = "".obs;
+  var backImageByte = "".obs;
+  var tiltedByte = "".obs;
+  var selfieByte = "".obs;
 
   @override
   void onInit() {
     super.onInit();
+    pageController = new PageController();
   }
 
+  @override
+  void onClose() {
+    super.onClose();
+    pageController.dispose();
+  }
 
+  nextPage() {
+    pageController.nextPage(duration: 200.milliseconds, curve: Curves.ease);
+  }
 
-  onPageChanged(int i) {}
+  convertImage() {
+    frontImageByte(convertToByte64(frontImage.value));
+    backImageByte(convertToByte64(backImage.value));
+    tiltedByte(convertToByte64(tilted.value));
+    selfieByte(convertToByte64(selfie.value));
+  }
 }
 
 convertToByte64(image) {

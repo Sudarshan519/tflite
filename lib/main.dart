@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io'; 
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:flutter_face_verification/main_screen.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:ui' as ui;
 import 'captured_image.dart';
@@ -27,7 +28,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MainScreen(),
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -42,7 +42,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   CameraController? cameraController;
-  final MainController mainController = Get.put(MainController());
+  final MainController mainController = Get.find<MainController>();
   var cameras = [];
   File? image;
   var base64;
@@ -75,21 +75,26 @@ class _MyHomePageState extends State<MyHomePage> {
         return null;
       }
 
-      XFile file = await cameraController!.takePicture();
-
-      var image = (file.path);
-      print(image);
-      print(widget.title);
-
-      switch (widget.title) {
-        case "FrontCapture":
+      await cameraController!.takePicture().then((file) {
+        if (widget.title == 'FrontCapture') {
           mainController.frontImage(file.path);
-          mainController.pageController
-              .nextPage(duration: 300.milliseconds, curve: Curves.ease);
-          break;
-        default:
-          print(widget.title);
-      }
+          mainController.nextPage();
+        }
+      });
+
+      // mainController.pageController
+      //     .nextPage(duration: 300.milliseconds, curve: Curves.ease);
+      // }
+
+      // switch (widget.title) {
+      //   case "FrontCapture":
+      // mainController.frontImage(file.path);
+      // mainController.pageController
+      //     .nextPage(duration: 300.milliseconds, curve: Curves.ease);
+      //     break;
+      //   default:
+      //     print(widget.title);
+      // }
       // cameraController!.dispose();
       // cameraController = null;
       // mainController.image(file.path);
@@ -155,8 +160,9 @@ class _MyHomePageState extends State<MyHomePage> {
   startImageStream() async {
     var data;
     await cameraController!.startImageStream((image) {
+      cameraImage = image;
       // setState(() {
-      runModel(image);
+      // runModel(image);
       // compute(runModel, image);
       // });
     });
@@ -180,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _focusCamera(TapUpDetails details) async {
     if (cameraController!.value.isInitialized) {
-      showFocusCircle = true;
+      // showFocusCircle = true;
       x = details.localPosition.dx;
       y = details.localPosition.dy;
 
@@ -222,25 +228,47 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void captureFromStream() async {
     var image = await convertYUV420toImageColor(cameraImage);
-    cameraController!.dispose();
-    cameraController = null;
-    switch (widget.title) {
-      case 'FrontCapture':
-        mainController.frontImage(image);
-        break;
-      case 'BackCapture':
-        mainController.backImage(image);
-        break;
-      case 'TiltedCapture':
-        mainController.tilted(image);
-        break;
-      case 'SelfieCapture':
-        mainController.selfie(image);
-        break;
-      default:
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    // print(appDocPath);
+    var file = File(
+        "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
+    await file.writeAsBytes(image);
+    // print(file.path);
+    // print(widget.title);
+    mainController.pageController
+        .nextPage(duration: 300.milliseconds, curve: Curves.ease);
+    if (widget.title == 'FrontCapture') {
+      mainController.frontImage(file.path);
+      mainController.nextPage();
+      // Get.to(ImageWidget(file: file));
     }
+
+    // Get.to(ImageWidget(file: file));
     // Navigator.of(context)
     //     .push(MaterialPageRoute(builder: (_) => CapturedImage(image: image)));
+    // image = file.path;
+    // print(image);
+    // cameraController!.dispose();
+    // cameraController = null;
+    // switch (widget.title) {
+    //   case 'FrontCapture':
+    //     mainController.frontImage(image);
+    //     Get.to(ImageWidget(file: file));
+    //     break;
+    //   case 'BackCapture':
+    //     mainController.backImage(image);
+    //     break;
+    //   case 'TiltedCapture':
+    //     mainController.tilted(image);
+    //     break;
+    //   case 'SelfieCapture':
+    //     mainController.selfie(image);
+    //     break;
+    //   default:
+    //     mainController.frontImage(image);
+    //     break;
+    // }
   }
 
   @override
@@ -318,17 +346,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fit: BoxFit.fill,
                                 )),
                             Center(
-                              child: Positioned(
-                                top: y - 20,
-                                left: x - 20,
-                                child: Container(
-                                  height: 200,
-                                  width: 340,
-                                  decoration: BoxDecoration(
-                                      // shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: Colors.white, width: 1.5)),
-                                ),
+                              // child: Positioned(
+                              //   top: y - 20,
+                              //   left: x - 20,
+                              child: Container(
+                                height: 200,
+                                width: 340,
+                                decoration: BoxDecoration(
+                                    // shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: Colors.white, width: 1.5)),
+                                // ),
                               ),
                             )
                           ],
@@ -356,7 +384,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           GestureDetector(
                             onTapUp: (details) {
-                              _focusCamera(details);
+                              // _focusCamera(details);
                             },
                             child: Container(
                               height: double.infinity,
@@ -382,10 +410,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Expanded(
                                     child: InkWell(
                                       onTap: () {
-                                        // captureImage();
+                                        captureImage();
 
                                         // takeScreenShot();
-                                        captureImage();
+                                        // captureImage();
                                         // captureFromStream();
                                       },
                                       child: Container(
@@ -438,51 +466,55 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ],
                               )),
                           // if (showFocusCircle)
-                          Center(
-                            // child: Positioned(
-                            // top: y - 20,
-                            // left: x - 20,
-                            child: Obx(
-                              () => RepaintBoundary(
-                                // key: imagePreview,
-                                child: Container(
-                                    height: 200,
-                                    width: 360,
-                                    decoration: BoxDecoration(
-                                        // shape: BoxShape.circle,
+                          // Center(
+                          //   child: Positioned(
+                          //     top: y - 20,
+                          //     left: x - 20,
+                          //     child: Obx(() => RepaintBoundary(
+                          //           // key: imagePreview,
+                          //           child: Container(
+                          //               height: 200,
+                          //               width: 360,
+                          //               decoration: BoxDecoration(
+                          //                   // shape: BoxShape.circle,
 
-                                        border: Border.all(
-                                            color: mainController.lagel.value ==
-                                                    "0 Front"
-                                                ? Color.fromARGB(
-                                                    255, 23, 181, 33)
-                                                : mainController.lagel.value ==
-                                                        "1 Back"
-                                                    ? Colors.blue
-                                                    : mainController
-                                                                .lagel.value ==
-                                                            "2 Tilted"
-                                                        ? Colors.red
-                                                        : Colors.white,
-                                            width: mainController.lagel.value ==
-                                                    "0 Front"
-                                                ? 3
-                                                : 1.5))),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: y - 20,
-                            left: x - 20,
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: Colors.white, width: 1.5)),
-                            ),
-                          ),
+                          //                   border: Border.all(
+                          //                       color: mainController
+                          //                                   .lagel.value ==
+                          //                               "0 Front"
+                          //                           ? const Color.fromARGB(
+                          //                               255, 23, 181, 33)
+                          //                           : mainController
+                          //                                       .lagel.value ==
+                          //                                   "1 Back"
+                          //                               ? Colors.blue
+                          //                               : mainController.lagel
+                          //                                           .value ==
+                          //                                       "2 Tilted"
+                          //                                   ? Colors.red
+                          //                                   : Colors.white,
+                          //                       width: mainController
+                          //                                   .lagel.value ==
+                          //                               "0 Front"
+                          //                           ? 3
+                          //                           : 1.5))),
+                          //         )),
+                          //   ),
+                          // ),
+
+                          // if (showFocusCircle)
+                          //   Positioned(
+                          //     top: y - 20,
+                          //     left: x - 20,
+                          //     child: Container(
+                          //       height: 40,
+                          //       width: 40,
+                          //       decoration: BoxDecoration(
+                          //           shape: BoxShape.circle,
+                          //           border: Border.all(
+                          //               color: Colors.white, width: 1.5)),
+                          //     ),
+                          //   ),
                           // )
                         ],
                       ),
@@ -493,9 +525,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   Column(
                       children: [
-                        OutlinedButton(
-                          onPressed: () {},
-                          child: const Text("Start Process"),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Center(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              mainController.pageController.nextPage(
+                                  duration: 200.milliseconds,
+                                  curve: Curves.ease);
+                            },
+                            child: const Text("Start Process"),
+                          ),
                         )
                       ],
                     ),
@@ -565,6 +606,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class ImageWidget extends StatelessWidget {
+  const ImageWidget({
+    Key? key,
+    required this.file,
+  }) : super(key: key);
+
+  final File file;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Image.file(
+          file,
+          fit: BoxFit.fitHeight,
+        ),
+      ),
+    );
+  }
+}
+
 class CapturedImage extends StatelessWidget {
   const CapturedImage({
     Key? key,
@@ -572,17 +634,17 @@ class CapturedImage extends StatelessWidget {
   }) : super(key: key);
 
   final Uint8List image;
-  getDecodedImage(Uint8List image) async {
-    final buffer = await ui.ImmutableBuffer.fromUint8List(image);
-    final descriptor = await ui.ImageDescriptor.encoded(buffer);
-    print(descriptor.height);
-    print(descriptor.width);
-  }
+  // getDecodedImage(Uint8List image) async {
+  //   final buffer = await ui.ImmutableBuffer.fromUint8List(image);
+  //   final descriptor = await ui.ImageDescriptor.encoded(buffer);
+  //   print(descriptor.height);
+  //   print(descriptor.width);
+  // }
 
   @override
   Widget build(BuildContext context) {
     // print(image.data.buffer.asInt8List());
-    getDecodedImage(image);
+    // getDecodedImage(image);
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
