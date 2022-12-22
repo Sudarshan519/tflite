@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io'; 
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -27,7 +27,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MainScreen(),
+      home:
+          //  MyHomePage(
+          //   title: "",
+          // )
+          MainScreen(),
     );
   }
 }
@@ -42,7 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   CameraController? cameraController;
-  final MainController mainController = Get.find<MainController>();
+  final MainController mainController = Get.put(MainController());
   var cameras = [];
   File? image;
   var base64;
@@ -50,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isVideoRecording = false;
   var output;
   bool showFocusCircle = false;
-
+  bool isPredicting = false;
   double x = 0;
 
   double y = 0;
@@ -61,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(cameras[0], ResolutionPreset.max);
     cameraController!.initialize().then((_) {
-      // startImageStream();
+      startImageStream();
       setState(() {});
     });
   }
@@ -162,7 +166,10 @@ class _MyHomePageState extends State<MyHomePage> {
     await cameraController!.startImageStream((image) {
       cameraImage = image;
       // setState(() {
-      // runModel(image);
+      if (isPredicting)
+        return;
+      else
+        runModel(image);
       // compute(runModel, image);
       // });
     });
@@ -581,19 +588,22 @@ class _MyHomePageState extends State<MyHomePage> {
       //   predictions!.last['label'];
       // });
       // return predictions;
-      predictions!.forEach((element) {
-        print(element['label'] + "prediction");
-        print(element.toString());
-        if (mainController.lagel.value != element['label']) {
-          // && element['confidence'] > 70
-          mainController.lagel(element['label']);
-          mainController.confidence(element['confidence'].toString());
-        } // else if (element['confidence'] > 70)
-        else {
-          mainController.predictions.add(element['label']);
-          mainController.confidence(element['confidence'.toString()]);
+      for (var element in predictions!) {
+        // print(element['label'] + "prediction");
+
+        if (element['confidence'] > .70) {
+          mainController.confidence(element['confidence'].toStringAsFixed(2));
+          print(mainController.confidence.value);
+          if (mainController.lagel.value != element['label']) {
+            // && element['confidence'] > 70
+            mainController.lagel(element['label']);
+          } // else if (element['confidence'] > 70)
+          else {
+            mainController.predictions.add(element['label']);
+            mainController.confidence(element['confidence'.toString()]);
+          }
         }
-      });
+      }
       cameraImage = image;
     } catch (e) {
       return null;

@@ -78,6 +78,7 @@ convertYUV420toImageColor(CameraImage image) async {
         img.data[index] = shift | (b << 16) | (g << 8) | r;
       }
     }
+    img = imglib.copyRotate(img, 90);
 
     imglib.PngEncoder pngEncoder = new imglib.PngEncoder(level: 0, filter: 0);
     List<int> png = pngEncoder.encodeImage(img);
