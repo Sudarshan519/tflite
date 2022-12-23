@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -75,6 +76,7 @@ class _CaptureImageState extends State<CaptureImage> {
   loadmodel() async {
     await Tflite.loadModel(
         model: 'assets/model_unquant.tflite', labels: 'assets/labels.txt');
+
     modelReady = true;
     setState(() {});
   }
@@ -103,6 +105,7 @@ class _CaptureImageState extends State<CaptureImage> {
     });
     for (var element in predictions ?? []) {
       if (element['confidence'] > .70) {
+        // print(element);
         if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
           if (label != element['label']) {
             isDetected = true;
@@ -134,7 +137,6 @@ class _CaptureImageState extends State<CaptureImage> {
             });
           }
         }
-        print(element);
       }
     }
     // mainController.predictions(prediction);
@@ -149,12 +151,12 @@ class _CaptureImageState extends State<CaptureImage> {
       x = data.x.round().abs();
       y = data.y.round().abs();
       z = data.z.round().abs();
-      checkAngle();
+      checkAngle(data);
     }, onError: (err) {}, onDone: () {}));
     setState(() {});
   }
 
-  checkAngle() {
+  checkAngle(AccelerometerEvent data) {
     // print("""$x $y $z""");
 
     /// portrait case
@@ -166,8 +168,8 @@ class _CaptureImageState extends State<CaptureImage> {
       }
       print("portrait");
       if (isCapturing) return;
-    } else if (x == 0 && y == 0 && z == 10) {
-      print("protraint 1");
+    } else if (x == 0 && y == 0 && (z) == 10) {
+      // print("protraint 1");
       if (label != "portrait") {
         phone = "portrait";
         setState(() {});
@@ -175,7 +177,7 @@ class _CaptureImageState extends State<CaptureImage> {
       // print("portrait");
       if (isCapturing) return;
     } else if (x == 0 && y == 7 && z == 0) {
-      print("45 degree detected");
+      // print("45 degree detected");
       if (label != "45 degree") {
         isCapturing = true;
         setState(() {
@@ -185,7 +187,7 @@ class _CaptureImageState extends State<CaptureImage> {
       // print("portrait");
       if (isCapturing) return;
     } else if (x == 0 && y == 7 && z == 7) {
-      print("45 degree 1");
+      // print("45 degree 1");
       if (label != "45 degree") {
         isCapturing = true;
         setState(() {
@@ -202,28 +204,38 @@ class _CaptureImageState extends State<CaptureImage> {
     }
 
     //      // Using x y and z from accelerometer, calculate x and y angles
-    //  float x_val, y_val, z_val, result;
-    //  unsigned short long x2, y2, z2; //24 bit
+    // double x_val, y_val, z_val, result;
+    // double x2, y2, z2; //24 bitshort long
 
-    //  // Lets get the deviations from our baseline
-    //  x_val = (float)accel_value_x-(float)accel_center_x;
-    //  y_val = (float)accel_value_y-(float)accel_center_y;
-    //  z_val = (float)accel_value_z-(float)accel_center_z;
+    // //  // Lets get the deviations from our baseline
+    // var accel_center_x = 0;
+    // var accel_center_y = 0;
+    // var accel_center_z = 10;
+    // var accel_value_x = data.x;
+    // var accel_value_z = data.z;
+    // var accel_value_y = data.y;
+    // x_val = accel_value_x - accel_center_x;
 
-    //  // Work out the squares
-    //  x2 = (unsigned short long)(x_val*x_val);
-    //  y2 = (unsigned short long)(y_val*y_val);
-    //  z2 = (unsigned short long)(z_val*z_val);
+    // var accel_angle_x, accel_angle_y;
+    // y_val = accel_value_y - accel_center_y;
+    // z_val = accel_value_z - accel_center_z;
 
-    //  //X Axis
-    //  result=sqrt(y2+z2);
-    //  result=x_val/result;
-    //  accel_angle_x = atan(result);
+    // //  // Work out the squares
+    // x2 = (x_val * x_val);
+    // y2 = (y_val * y_val);
+    // z2 = (z_val * z_val);
 
-    //  //Y Axis
-    //  result=sqrt(x2+z2);
-    //  result=y_val/result;
-    //  accel_angle_y = atan(result);
+    // //  //X Axis
+    // result = sqrt(y2 + z2);
+    // result = x_val / result;
+    // accel_angle_x = atan(result);
+
+    // //  //Y Axis
+    // result = sqrt(x2 + z2);
+    // result = y_val / result;
+    // accel_angle_y = atan(result);
+    // print(accel_angle_x);
+    // print(accel_angle_y);
   }
 
   @override

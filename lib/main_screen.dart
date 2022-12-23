@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter_face_verification/screens/face_detection_screen.dart';
+import 'package:flutter_face_verification/screens/liveliness_detection_screen.dart';
 import 'package:get/get.dart';
 import 'screens/capture_screen.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +30,7 @@ class MainScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28.0),
             child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -71,8 +73,9 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const CaptureImage(type: "TiltedImage"),
     const Confirmation(type: "TiltedCapture"),
     const Tutorial(title: "SelfieTutorial"),
-    const CaptureImage(type: "SelfieCapture"),
+    const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
+    const LivelinessDetection(),
     const DocumentConfirmation()
   ];
 
