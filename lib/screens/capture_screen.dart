@@ -68,8 +68,7 @@ class _CaptureImageState extends State<CaptureImage> {
       return;
     } else {
       // if (modelReady)
-
-      runmodelonImage(cameraImage);
+      if (mounted) runmodelonImage(cameraImage);
     }
   }
 
@@ -83,9 +82,10 @@ class _CaptureImageState extends State<CaptureImage> {
 
   //run model on image
   runmodelonImage(CameraImage image) async {
-    setState(() {
-      isRunning = true;
-    });
+    if (mounted)
+      setState(() {
+        isRunning = true;
+      });
     var predictions = await Tflite.runModelOnFrame(
       bytesList: image.planes.map((plane) {
         return plane.bytes;
@@ -99,42 +99,46 @@ class _CaptureImageState extends State<CaptureImage> {
       threshold: .1,
       asynch: true,
     );
-
-    setState(() {
-      isRunning = false;
-    });
+    if (mounted)
+      setState(() {
+        isRunning = false;
+      });
     for (var element in predictions ?? []) {
       if (element['confidence'] > .70) {
         // print(element);
         if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
           if (label != element['label']) {
             isDetected = true;
-            setState(() {
-              label = element['label'];
-            });
+            if (mounted)
+              setState(() {
+                label = element['label'];
+              });
           }
         } else if (widget.type == "BackCapture" &&
             element['label'] == "1 Back") {
           if (label != element['label']) {
             isDetected = true;
-            setState(() {
-              label = element['label'];
-            });
+            if (mounted)
+              setState(() {
+                label = element['label'];
+              });
           }
         } else if (widget.type == "TiltedImage" &&
             element['label'] == "2 Tilted") {
           if (label != element['label']) {
             isDetected = true;
-            setState(() {
-              label = element['label'];
-            });
+            if (mounted)
+              setState(() {
+                label = element['label'];
+              });
           }
         } else {
           if (label != "") {
             isDetected = false;
-            setState(() {
-              label = "";
-            });
+            if (mounted)
+              setState(() {
+                label = "";
+              });
           }
         }
       }

@@ -61,11 +61,10 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     cameraController.dispose();
     cameraInitialized = false;
     controller.nextPage();
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   initializeCamera() async {
-    // setState(() {});
     loadModel();
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(cameras[1], ResolutionPreset.low);
@@ -78,13 +77,13 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
           if (isPredicting) {
             return;
           } else {
-            runModel(image);
+            if (mounted) runModel(image);
           }
         } else {
           cameraController.stopImageStream();
           cameraController.dispose();
           cameraInitialized = false;
-          setState(() {});
+          if (mounted) setState(() {});
         }
       });
     });
@@ -158,13 +157,13 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
         if (element['confidence'] > .30 &&
             element['label'] != "2 Not Detected") {
-          takePicture(image);
           // print(element);
           if (detected != element['label']) {
             print(element.toString() + "LOG EYE");
+            // takePicture(image);
             detected = element['label'];
             detectedBlinks.add(element.toStringAsFixed(2));
-            if (detectedBlinks.length > 1) takePicture(image);
+            if (detectedBlinks.length > 2) takePicture(image);
 
             blinkDetected = true;
             setState(() {});
@@ -176,8 +175,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
                 seconds: 3,
               ), () {
             blinkDetected = false;
-
-            setState(() {});
+            if (mounted) setState(() {});
           });
         }
       });

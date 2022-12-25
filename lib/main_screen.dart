@@ -75,7 +75,9 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const Tutorial(title: "SelfieTutorial"),
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
+    const Tutorial(title: "Liveliness Tutorial"),
     const LivelinessDetection(),
+    // const Confirmation(type: "Liveliness Tutorial"),
     const DocumentConfirmation()
   ];
 

@@ -47,7 +47,7 @@ class _FaceDetectionState extends State<FaceDetection> {
 
   takePicture(cameraImage) async {
     loading = true;
-    setState(() {});
+    if (mounted) setState(() {});
     var image = await convertYUV420toImageColor(cameraImage);
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
@@ -61,7 +61,7 @@ class _FaceDetectionState extends State<FaceDetection> {
     cameraController.dispose();
     Future.delayed(Duration.zero, () {
       loading = false;
-      setState(() {});
+      if (mounted) setState(() {});
     });
   }
 
@@ -81,7 +81,7 @@ class _FaceDetectionState extends State<FaceDetection> {
           cameraController.stopImageStream();
           cameraController.dispose();
           cameraInitialized = false;
-          setState(() {});
+          if (mounted) setState(() {});
         }
       });
     });
@@ -134,16 +134,12 @@ class _FaceDetectionState extends State<FaceDetection> {
             timer.cancel();
           }
         }
-
-        setState(() {});
+        if (mounted) setState(() {});
       } else {
         if (timerInitialized) timer.cancel();
         value = 5;
-        // Future.delayed(const Duration(milliseconds: 100), () {
-        // print(element['label']);
         if (faceDetected) faceDetected = false;
-        setState(() {});
-        // });
+        if (mounted) setState(() {});
       }
     });
   }
