@@ -37,7 +37,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   var image;
   var detected;
   var eye = '';
-  final MainController controller = Get.find();
+  final MainController controller = Get.put(MainController()); // Get.find();
   @override
   void initState() {
     // TODO: implement initState
@@ -47,7 +47,8 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
   loadModel() async {
     await Tflite.loadModel(
-        model: 'assets/model_eyes.tflite', labels: 'assets/labels_eyes.txt');
+        model: 'assets/eyes/model_unquant.tflite',
+        labels: 'assets/eyes/labels.txt');
 
     modelReady = true;
     setState(() {});
@@ -158,12 +159,13 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
         if (element['confidence'] > .50 &&
             element['label'] != "2 Not Detected") {
-          // print(element);
+          print(element);
           if (detected != element['label']) {
             print(element.toString() + "LOG EYE");
             // takePicture(image);
             detected = element['label'];
-            // detectedBlinks.add(element.toStringAsFixed(2));
+            detectedBlinks.add(element);
+            print(detectedBlinks.length);
             if (detectedBlinks.length > 2) takePicture(image);
 
             blinkDetected = true;
