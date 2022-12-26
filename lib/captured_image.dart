@@ -44,7 +44,7 @@ import 'package:image/image.dart';
 // }
 
 const shift = (0xFF << 24);
-convertYUV420toImageColor(CameraImage image) async {
+convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
   try {
     final int width = image.width;
     final int height = image.height;
@@ -78,7 +78,7 @@ convertYUV420toImageColor(CameraImage image) async {
         img.data[index] = shift | (b << 16) | (g << 8) | r;
       }
     }
-    img = imglib.copyRotate(img, -90);
+    img = imglib.copyRotate(img, rotate ? -90 : 90);
 
     imglib.PngEncoder pngEncoder = new imglib.PngEncoder(level: 0, filter: 0);
     List<int> png = pngEncoder.encodeImage(img);

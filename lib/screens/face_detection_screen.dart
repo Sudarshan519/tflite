@@ -29,6 +29,7 @@ class _FaceDetectionState extends State<FaceDetection> {
   bool timerInitialized = false;
   var path = "";
   var loading = false;
+  var nextPage = false;
   final MainController controller = Get.find();
   @override
   void initState() {
@@ -47,29 +48,32 @@ class _FaceDetectionState extends State<FaceDetection> {
 
   takePicture(cameraImage) async {
     loading = true;
+    captured = true;
     if (mounted) setState(() {});
-    var image = await convertYUV420toImageColor(cameraImage);
+    var image = await convertYUV420toImageColor(cameraImage, rotate: true);
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
+
     // print(appDocPath);
     var file = File(
         "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
     await file.writeAsBytes(image);
     path = file.path;
     controller.selfie(path);
-    controller.nextPage();
+
     cameraController.dispose();
     Future.delayed(Duration.zero, () {
       loading = false;
       if (mounted) setState(() {});
     });
+    if (!nextPage) controller.nextPage();
   }
 
   initializeCamera() async {
     // setState(() {});
     loadModel();
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.medium);
+    cameraController = CameraController(cameras[1], ResolutionPreset.max);
     await cameraController.initialize().then((_) {
       cameraInitialized = true;
 
@@ -107,8 +111,9 @@ class _FaceDetectionState extends State<FaceDetection> {
       asynch: true,
     );
     isPredicting = false;
-    predictions!.forEach((element) {
-      if (element['confidence'] > .98 &&
+    for (var element in predictions!) {
+      print(element);
+      if (element['confidence'] > .80 &&
           element['label'] == "0 Face Detected") {
         faceDetected = true;
 
@@ -116,12 +121,12 @@ class _FaceDetectionState extends State<FaceDetection> {
           timer = Timer.periodic(const Duration(seconds: 5), (t) {
             if (faceDetected) {
               if (value == 5) {
-                captured = true;
-                takePicture(image);
+                if (!captured) takePicture(image);
                 t.cancel();
                 timer.cancel();
               } else {
                 value++;
+                if (mounted) setState(() {});
               }
             } else {
               t.cancel();
@@ -141,12 +146,11 @@ class _FaceDetectionState extends State<FaceDetection> {
         if (faceDetected) faceDetected = false;
         if (mounted) setState(() {});
       }
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // controller.nextPage();
     return Scaffold(
       body: Stack(children: [
         // camera
@@ -166,7 +170,7 @@ class _FaceDetectionState extends State<FaceDetection> {
             ),
           )
         else
-          loading ? CircularProgressIndicator() : Image.file(File(path))
+          loading ? const CircularProgressIndicator() : Image.file(File(path))
       ]),
     );
   }

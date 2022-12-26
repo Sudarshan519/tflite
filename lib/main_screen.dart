@@ -238,10 +238,12 @@ class _ConfirmationState extends State<Confirmation> {
                       child: const Text("Retake")),
                   OutlinedButton(
                       onPressed: () {
+                        // pagecontroller.previousPage(
+                        //     duration: 300.milliseconds, curve: Curves.ease);
                         controller.pageController.nextPage(
                             duration: 300.milliseconds, curve: Curves.ease);
                       },
-                      child: const Text("Submit"))
+                      child:   Text(  "Next"))
                 ],
               ),
             )
@@ -345,9 +347,14 @@ class _DocumentConfirmationState extends State<DocumentConfirmation> {
                 Text(controller.selfieByte.value.substring(0, 100)),
                 ElevatedButton(
                     onPressed: () async {
-                      await Get.delete<MainController>();
+                      PageController pagecontroller = controller.pageController;
+                      pagecontroller.previousPage(
+                          duration: 300.milliseconds, curve: Curves.ease);
+                      pagecontroller.previousPage(
+                          duration: 300.milliseconds, curve: Curves.ease);
+                      // await Get.delete<MainController>();
 
-                      Get.offAll(() => MainScreen());
+                      // Get.offAll(() => MainScreen());
                     },
                     child: const Text("Submit"))
               ],

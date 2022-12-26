@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +46,7 @@ class _CaptureImageState extends State<CaptureImage> {
   bool isDetected = false;
   var image;
 
+  late Timer timer;
   getAvailableCamera() async {
     loadmodel();
     List<CameraDescription> cameras = await availableCameras();
@@ -55,8 +55,9 @@ class _CaptureImageState extends State<CaptureImage> {
         ResolutionPreset.max);
     cameraController.initialize().then((_) {
       isInitialized = true;
-      modelReady = true;
-      cameraController.startImageStream(runModelOnAvailableImage);
+      if (modelReady) {
+        cameraController.startImageStream(runModelOnAvailableImage);
+      }
 
       setState(() {});
     });
@@ -67,14 +68,22 @@ class _CaptureImageState extends State<CaptureImage> {
     if (isRunning) {
       return;
     } else {
-      // if (modelReady)
-      if (mounted) runmodelonImage(cameraImage);
+      if (modelReady) if (mounted) runmodelonImage(cameraImage);
     }
   }
 
   loadmodel() async {
-    await Tflite.loadModel(
-        model: 'assets/model_unquant.tflite', labels: 'assets/labels.txt');
+    var path = widget.type == "FrontCapture"
+        ? 'assets/front/model_unquant.tflite'
+        : widget.type == "BackCapture"
+            ? 'assets/back/model_unquant.tflite'
+            : 'assets/model_unquant.tflite';
+    var labels = widget.type == "FrontCapture"
+        ? 'assets/front/labels.txt'
+        : widget.type == "BackCapture"
+            ? 'assets/front/labels.txt'
+            : 'assets/labels.txt';
+    await Tflite.loadModel(model: path, labels: labels);
 
     modelReady = true;
     setState(() {});
@@ -82,67 +91,74 @@ class _CaptureImageState extends State<CaptureImage> {
 
   //run model on image
   runmodelonImage(CameraImage image) async {
-    if (mounted)
+    if (mounted) {
       setState(() {
         isRunning = true;
       });
-    var predictions = await Tflite.runModelOnFrame(
-      bytesList: image.planes.map((plane) {
-        return plane.bytes;
-      }).toList(),
-      imageHeight: image.height,
-      imageWidth: image.width,
-      imageMean: 127.5,
-      imageStd: 127.5,
-      rotation: 90,
-      numResults: 2,
-      threshold: .1,
-      asynch: true,
-    );
-    if (mounted)
-      setState(() {
-        isRunning = false;
-      });
-    for (var element in predictions ?? []) {
-      if (element['confidence'] > .70) {
-        // print(element);
-        if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
-          if (label != element['label']) {
-            isDetected = true;
-            if (mounted)
-              setState(() {
-                label = element['label'];
-              });
-          }
-        } else if (widget.type == "BackCapture" &&
-            element['label'] == "1 Back") {
-          if (label != element['label']) {
-            isDetected = true;
-            if (mounted)
-              setState(() {
-                label = element['label'];
-              });
-          }
-        } else if (widget.type == "TiltedImage" &&
-            element['label'] == "2 Tilted") {
-          if (label != element['label']) {
-            isDetected = true;
-            if (mounted)
-              setState(() {
-                label = element['label'];
-              });
-          }
-        } else {
-          if (label != "") {
-            isDetected = false;
-            if (mounted)
-              setState(() {
-                label = "";
-              });
+    }
+    try {
+      var predictions = await Tflite.runModelOnFrame(
+        bytesList: image.planes.map((plane) {
+          return plane.bytes;
+        }).toList(),
+        imageHeight: image.height,
+        imageWidth: image.width,
+        imageMean: 127.5,
+        imageStd: 127.5,
+        rotation: 90,
+        numResults: 2,
+        threshold: .1,
+        asynch: true,
+      );
+      if (mounted) {
+        setState(() {
+          isRunning = false;
+        });
+      }
+      for (var element in predictions ?? []) {
+        if (element['confidence'] > .70) {
+          // print(element);
+          if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
+            if (label != element['label']) {
+              isDetected = true;
+              if (mounted) {
+                setState(() {
+                  label = element['label'];
+                });
+              }
+            }
+          } else if (widget.type == "BackCapture" &&
+              element['label'] == "1 Back") {
+            if (label != element['label']) {
+              isDetected = true;
+              if (mounted) {
+                setState(() {
+                  label = element['label'];
+                });
+              }
+            }
+          } else if (widget.type == "TiltedImage" &&
+              element['label'] == "2 Tilted") {
+            if (label != element['label']) {
+              isDetected = true;
+              if (mounted) {
+                setState(() {
+                  label = element['label'];
+                });
+              }
+            }
+          } else {
+            if (label != "") {
+              isDetected = false;
+              if (mounted)
+                setState(() {
+                  label = "";
+                });
+            }
           }
         }
       }
-    }
+    } catch (e) {}
     // mainController.predictions(prediction);
   }
 
@@ -151,10 +167,10 @@ class _CaptureImageState extends State<CaptureImage> {
     super.initState();
     getAvailableCamera();
     _streamSubscriptions.add(accelerometerEvents.listen((data) {
-      // print(data);
-      x = data.x.round().abs();
-      y = data.y.round().abs();
-      z = data.z.round().abs();
+      print(data);
+      x = data.x.floor();
+      y = data.y.floor();
+      z = data.z.round();
       checkAngle(data);
     }, onError: (err) {}, onDone: () {}));
     setState(() {});
@@ -164,7 +180,7 @@ class _CaptureImageState extends State<CaptureImage> {
     // print("""$x $y $z""");
 
     /// portrait case
-    if (x == 0 && y == 10 && z == 0) {
+    if (x == 0 && y == 9 && z == 0) {
       if (label != "portrait") {
         setState(() {
           phone = "portrait";
@@ -172,7 +188,7 @@ class _CaptureImageState extends State<CaptureImage> {
       }
       print("portrait");
       if (isCapturing) return;
-    } else if (x == 0 && y == 0 && (z) == 10) {
+    } else if (x == 0 && y == 0 && (z) > 9) {
       // print("protraint 1");
       if (label != "portrait") {
         phone = "portrait";
@@ -201,7 +217,7 @@ class _CaptureImageState extends State<CaptureImage> {
     } else {
       // if (label != "Failed detection") {
       setState(() {
-        phone = "Failed detection";
+        phone = "";
       });
       // }
       // print("Failed detection");
@@ -268,6 +284,8 @@ class _CaptureImageState extends State<CaptureImage> {
                 : controller.selfie(file.path);
     controller.nextPage();
 
+    ///TODO:CAMERA TAKE PICTURE
+    ///
     /// camera controller when stream disabled
     // await cameraController.takePicture().then((image) {
     //   if (widget.type == "FrontCapture") {
@@ -303,10 +321,7 @@ class _CaptureImageState extends State<CaptureImage> {
       body: Stack(children: [
         if (isInitialized)
           Center(
-            child: SizedBox(
-                // height: 300,
-                // width: 340,
-                child: CameraPreview(cameraController)),
+            child: SizedBox(child: CameraPreview(cameraController)),
           ),
         Transform(
           transform: Matrix4.identity()..rotateZ(0.0),
@@ -318,7 +333,11 @@ class _CaptureImageState extends State<CaptureImage> {
                   color: Colors.transparent,
                   border: Border.all(
                       width: label != "" ? 2 : 1.5,
-                      color: label != "" ? Colors.green : Colors.grey)),
+                      color: (phone == 'portrait' || phone == 'tilted')
+                          ? Colors.green
+                          : label != ""
+                              ? Colors.green
+                              : Colors.grey)),
             ),
           ),
         ),
@@ -326,47 +345,47 @@ class _CaptureImageState extends State<CaptureImage> {
             child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(phone,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: Colors.white, shadows: <Shadow>[
-                  const Shadow(
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 3.0,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                  const Shadow(
-                    offset: Offset(1.5, 1.5),
-                    blurRadius: 3.0,
-                    color: Color.fromARGB(255, 193, 16, 16),
-                  ),
-                ])),
-            Text(
-              label,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(color: Colors.white, shadows: <Shadow>[
-                const Shadow(
-                  offset: Offset(1.0, 1.0),
-                  blurRadius: 3.0,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                ),
-                const Shadow(
-                  offset: Offset(1.5, 1.5),
-                  blurRadius: 3.0,
-                  color: Color.fromARGB(255, 193, 16, 16),
-                ),
-              ]),
-            )
+            // Text(phone,
+            //     style: Theme.of(context)
+            //         .textTheme
+            //         .titleMedium!
+            //         .copyWith(color: Colors.white, shadows: <Shadow>[
+            //       const Shadow(
+            //         offset: Offset(1.0, 1.0),
+            //         blurRadius: 3.0,
+            //         color: Color.fromARGB(255, 0, 0, 0),
+            //       ),
+            //       const Shadow(
+            //         offset: Offset(1.5, 1.5),
+            //         blurRadius: 3.0,
+            //         color: Color.fromARGB(255, 193, 16, 16),
+            //       ),
+            //     ])),
+            // Text(
+            //   label,
+            //   style: Theme.of(context)
+            //       .textTheme
+            //       .titleMedium!
+            //       .copyWith(color: Colors.white, shadows: <Shadow>[
+            //     const Shadow(
+            //       offset: Offset(1.0, 1.0),
+            //       blurRadius: 3.0,
+            //       color: Color.fromARGB(255, 0, 0, 0),
+            //     ),
+            //     const Shadow(
+            //       offset: Offset(1.5, 1.5),
+            //       blurRadius: 3.0,
+            //       color: Color.fromARGB(255, 193, 16, 16),
+            //     ),
+            //   ]),
+            // )
           ],
         )),
         Align(
             alignment: Alignment.bottomCenter,
             child: InkWell(
                 onTap: () {
-                  if (isDetected) {
+                  if (isDetected || phone == 'portrait') {
                     takePicture(image);
                   } else if (phone == "45 degree") {
                     takePicture(image);
@@ -377,7 +396,11 @@ class _CaptureImageState extends State<CaptureImage> {
                       color: Colors.white,
                       border: Border.all(
                           width: label != "" ? 2 : 1.5,
-                          color: label != "" ? Colors.green : Colors.grey)),
+                          color: phone == 'portrait'
+                              ? Colors.green
+                              : label != ""
+                                  ? Colors.green
+                                  : Colors.grey)),
                   alignment: Alignment.center,
                   height: 50,
                   width: 150,

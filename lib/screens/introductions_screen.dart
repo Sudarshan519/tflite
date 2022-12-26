@@ -23,7 +23,7 @@ class _IntroScreenState extends State<IntroScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(12),
           child: Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.max,  
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
