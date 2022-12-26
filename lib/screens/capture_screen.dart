@@ -52,7 +52,7 @@ class _CaptureImageState extends State<CaptureImage> {
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(
         widget.type == "SelfieCapture" ? cameras[1] : cameras[0],
-        ResolutionPreset.max);
+        ResolutionPreset.medium);
     cameraController.initialize().then((_) {
       isInitialized = true;
       if (modelReady) {
@@ -77,12 +77,16 @@ class _CaptureImageState extends State<CaptureImage> {
         ? 'assets/front/model_unquant.tflite'
         // : widget.type == "BackCapture"
         //     ? 'assets/back/model_unquant.tflite'
-        : 'assets/model_unquant.tflite';
+        : widget.type == "TiltedImage"
+            ? 'assets/tilted/model_unquant.tflite'
+            : 'assets/model_unquant.tflite';
     var labels = widget.type == "FrontCapture"
         ? 'assets/front/labels.txt'
         // : widget.type == "BackCapture"
         //     ? 'assets/front/labels.txt'
-        : 'assets/labels.txt';
+        : widget.type == "TiltedImage"
+            ? 'assets/tilted/labels.txt'
+            : 'assets/labels.txt';
     await Tflite.loadModel(model: path, labels: labels);
 
     modelReady = true;
