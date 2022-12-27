@@ -164,7 +164,7 @@ class _FaceDetectionState extends State<FaceDetection> {
                 border: Border.all(
                     width: 2, color: faceDetected ? Colors.green : Colors.grey),
               ),
-              height: 304,
+              height: 404,
               width: 304,
               child: Text(value.toString()),
             ),

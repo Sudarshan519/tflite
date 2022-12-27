@@ -275,10 +275,13 @@ class _CaptureImageState extends State<CaptureImage> {
     var image = await convertYUV420toImageColor(cameraImage);
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
+    // cameraController.stopImageStream();
     // print(appDocPath);
     var file = File(
         "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
     await file.writeAsBytes(image);
+
+    // var newImage = await cropImage(file.path);
     widget.type == "FrontCapture"
         ? controller.frontImage(file.path)
         : widget.type == "BackCapture"

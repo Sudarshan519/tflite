@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_face_verification/captured_image.dart';
 import 'package:flutter_face_verification/controller.dart';
@@ -36,7 +37,9 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   var runtime = 0;
   var image;
   var detected;
-  var eye = '';
+  var blinks = 0;
+
+  var eye = 'Not Detected';
   final MainController controller = Get.put(MainController()); // Get.find();
   @override
   void initState() {
@@ -69,7 +72,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   initializeCamera() async {
     loadModel();
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.low);
+    cameraController = CameraController(cameras[1], ResolutionPreset.medium);
     await cameraController.initialize().then((_) {
       cameraInitialized = true;
 
@@ -95,7 +98,53 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: [
-        if (cameraInitialized) CameraPreview(cameraController),
+        if (cameraInitialized) Center(child: CameraPreview(cameraController)),
+        Center(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                  width: 2,
+                  color: eye == "Blink Detected" ? Colors.green : Colors.grey),
+            ),
+            height: 304,
+            width: 304,
+            child: Text(eye,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.white, shadows: <Shadow>[
+                  const Shadow(
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 3.0,
+                    color: Color.fromARGB(255, 0, 0, 0),
+                  ),
+                  const Shadow(
+                    offset: Offset(1.5, 1.5),
+                    blurRadius: 3.0,
+                    color: Color.fromARGB(255, 193, 16, 16),
+                  ),
+                ])),
+          ),
+        ),
+        Center(
+            child: Text(
+          eye,
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium!
+              .copyWith(color: Colors.white, shadows: <Shadow>[
+            const Shadow(
+              offset: Offset(1.0, 1.0),
+              blurRadius: 3.0,
+              color: Color.fromARGB(255, 0, 0, 0),
+            ),
+            const Shadow(
+              offset: Offset(1.5, 1.5),
+              blurRadius: 3.0,
+              color: Color.fromARGB(255, 193, 16, 16),
+            ),
+          ]),
+        )),
         Center(
             child: Text(
           blinkDetected ? "Blink Detected" : "",
@@ -119,9 +168,10 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
         Align(
           alignment: Alignment.bottomCenter,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(eye),
-            Text(detectedBlinks.toString()),
-            Text("Delay"),
+            // Text(eye),
+            // if (detectedBlinks.isNotEmpty)
+            Obx(() => Text(controller.blinks.toString())),
+            const Text("Delay"),
             Text(predictionTime.toString())
           ]),
         )
@@ -133,7 +183,6 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     isPredicting = true;
     timeStamp = DateTime.now().millisecondsSinceEpoch;
 
-    // });
     try {
       var predictions = await Tflite.runModelOnFrame(
         bytesList: image.planes.map((plane) {
@@ -151,40 +200,56 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       var currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
       predictionTime = currentTimeStamp - timeStamp;
 
-      predictions!.forEach((element) {
-        eye = element['label'];
-        print(element.toString() + "LOG EYE");
-        eye = element['label'];
-        // if (element['label'] == '1 Eyes Closed')
-
+      for (var element in predictions!) {
         if (element['confidence'] > .50 &&
             element['label'] != "2 Not Detected") {
-          print(element);
           if (detected != element['label']) {
-            print(element.toString() + "LOG EYE");
-            // takePicture(image);
-            detected = element['label'];
+            controller.blinks = controller.blinks + 1;
+            if (detectedBlinks.length > 10) {
+              takePicture(image);
+            }
             detectedBlinks.add(element);
-            print(detectedBlinks.length);
-            if (detectedBlinks.length > 2) takePicture(image);
 
-            blinkDetected = true;
             setState(() {});
           }
+          detected = element['label'];
+
+          if (element['label'] == "0 Eyes Open") {
+            eye = "Blink Detected";
+            // blinks++;
+            // if (blinks > 4) {
+            //   takePicture(image);
+            // }
+            Future.delayed(const Duration(seconds: 1), () {
+              eye = "";
+            });
+            blinkDetected = true;
+          } else {
+            eye = "";
+            blinkDetected = false;
+          }
+          if (mounted) setState(() {});
+          if (detected != element['label']) {
+            // takePicture(image);
+            detected = element['label'];
+            if (detectedBlinks.length > 10) {
+              takePicture(image);
+            }
+          }
         } else {
-          print("Not Detected" "LOG EYE");
           Future.delayed(
               const Duration(
                 seconds: 3,
               ), () {
             blinkDetected = false;
-            if (mounted) setState(() {});
           });
         }
-      });
+      }
       isPredicting = false;
     } catch (e) {
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
     }
   }
 }

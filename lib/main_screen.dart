@@ -62,6 +62,7 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
+    const LivelinessDetection(),
     const IntroScreen(),
     const Tutorial(title: "FrontTutorial"),
     const CaptureImage(type: "FrontCapture"),
@@ -76,7 +77,7 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
     const Tutorial(title: "Liveliness Tutorial"),
-    const LivelinessDetection(),
+
     // const Confirmation(type: "Liveliness Tutorial"),
     const DocumentConfirmation()
   ];
@@ -243,7 +244,7 @@ class _ConfirmationState extends State<Confirmation> {
                         controller.pageController.nextPage(
                             duration: 300.milliseconds, curve: Curves.ease);
                       },
-                      child:   Text(  "Next"))
+                      child: Text("Next"))
                 ],
               ),
             )
