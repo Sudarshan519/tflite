@@ -155,7 +155,7 @@ class _FaceDetectionState extends State<FaceDetection> {
       body: Stack(children: [
         // camera
         if (!captured)
-          if (cameraInitialized) CameraPreview(cameraController),
+          if (cameraInitialized) Center(child: CameraPreview(cameraController)),
         //face bounding box
         if (!captured)
           Center(

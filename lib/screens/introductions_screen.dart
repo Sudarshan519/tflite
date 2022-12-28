@@ -18,37 +18,108 @@ class _IntroScreenState extends State<IntroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( 
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(12),
           child: Column(
-            mainAxisSize: MainAxisSize.max,  
+            mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "Intro Screen",
-                style: Theme.of(context).textTheme.titleLarge,
+              const SizedBox(height: 40),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                    // borderRadius: BorderRadius.circular(30),
+                    color: const Color.fromRGBO(84, 182, 234, 1)),
+                child: Text(
+                  "Three types of identity verification documents will be taken.",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(
                 height: 20,
               ),
-              const Text(
-                "Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum eum illum eos, dolores impedit, consectetur corporis molestias mollitia corrupti tempore veniam repudiandae expedita nesciunt distinctio! Commodi id illum, veritatis tempora laboriosam corrupti optio maxime doloribus soluta molestiae, tempore hic, deleniti dolorum voluptate! Adipisci tempora natus illo excepturi omnis dolorem aliquam dignissimos iure cumque nostrum quasi dolore voluptatum accusantium ipsa quis ea temporibus distinctio, consectetur accusamus doloremque. Tempora numquam velit libero voluptas beatae nobis commodi pariatur dolore reiciendis odio, suscipit natus id cupiditate placeat. Fugit reiciendis quasi praesentium quis omnis quas nam distinctio, est at vero similique itaque accusantium, numquam molestiae modi cupiditate adipisci excepturi vitae dolorem perferendis et ipsa necessitatibus? Hic, officiis. Laboriosam quidem ab animi. Possimus sit asperiores quam odit fugit suscipit saepe eos. Cumque aliquam dignissimos ab nemo beatae quod tenetur in quibusdam, aperiam iure quidem, quaerat omnis a. Ducimus ipsam quidem distinctio magni perferendis deserunt aliquam, commodi enim reiciendis officia autem possimus id suscipit veniam expedita, accusamus voluptatem repudiandae impedit quisquam aperiam! Earum quisquam ut, inventore recusandae dolorum iusto corporis soluta tempora, unde quae eum dicta magnam illum impedit perferendis dolores vel nemo iure iste accusamus! Sequi aperiam fugiat facilis at doloremque omnis accusamus, inventore similique, quasi, fuga velit possimus odit quam. Ducimus illo eaque possimus veniam voluptate expedita, rerum tempore velit laborum atque placeat corrupti nisi nostrum asperiores! Nulla illum neque autem harum vitae! Deserunt officia ab explicabo minus voluptates libero dolor beatae temporibus quaerat aspernatur, dolorem hic laudantium assumenda, consequuntur, quam odit. Suscipit eius nesciunt exercitationem neque aspernatur quia esse architecto tempora quaerat necessitatibus odio porro id, similique sapiente deleniti minima. Pariatur provident libero, eos ducimus ut ipsa cum officiis quia officia sequi repudiandae itaque expedita excepturi doloremque nesciunt aspernatur rerum! Dolore, fugit? Aut assumenda quibusdam laborum distinctio aspernatur odio cupiditate ab et iure eligendi eveniet exercitationem nobis, adipisci amet quasi?",
-                textAlign: TextAlign.justify,
+              Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Expanded(
+                      child: Text(
+                    "Surface",
+                    textAlign: TextAlign.center,
+                  )),
+                  Expanded(
+                      child: Image.asset(
+                          "assets/images/drive_license_front.webp")),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: Get.width,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        controller.pageController.nextPage(
-                            duration: 300.milliseconds, curve: Curves.ease);
-                      },
-                      child: const Text("Start Tutorial")),
+              const SizedBox(
+                height: 20,
+              ),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Expanded(
+                      child: Text(
+                    "Oblique (45 degrees)",
+                    textAlign: TextAlign.center,
+                  )),
+                  Expanded(
+                    child: Image.asset(
+                        "assets/images/drive_license_diagonal.webp"),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 18),
+                child: Text(
+                  "*Photographed from an angle to capture the thickness of the document.",
+                  style: TextStyle(color: Colors.grey),
                 ),
-              )
+              ),
+              Divider(),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      child: Text(
+                    "Back",
+                    textAlign: TextAlign.center,
+                  )),
+                  Expanded(
+                    child: Image.asset("assets/images/drive_license_back.webp"),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Divider(),
+              SizedBox(
+                width: Get.width,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Color.fromRGBO(0, 149, 235, 1)),
+                    onPressed: () {
+                      controller.pageController.nextPage(
+                          duration: 300.milliseconds, curve: Curves.ease);
+                    },
+                    child: const Text("Start Tutorial")),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
             ],
           ),
         ),

@@ -62,8 +62,8 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
-    const LivelinessDetection(),
     const IntroScreen(),
+    const IntroSecond(),
     const Tutorial(title: "FrontTutorial"),
     const CaptureImage(type: "FrontCapture"),
     const Confirmation(type: "FrontCapture"),
@@ -76,8 +76,9 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const Tutorial(title: "SelfieTutorial"),
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
-    const Tutorial(title: "Liveliness Tutorial"),
 
+    const Tutorial(title: "Liveliness Tutorial"),
+    const LivelinessDetection(),
     // const Confirmation(type: "Liveliness Tutorial"),
     const DocumentConfirmation()
   ];
@@ -99,6 +100,58 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
   }
 }
 
+class IntroSecond extends StatelessWidget {
+  const IntroSecond({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final MainController controller = Get.find();
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 80,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18.0, vertical: 8),
+                child: Text(
+                  "Align your identity verification document with the specified position\n.",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              Image.asset(
+                "assets/images/drive_license_random.gif",
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: Get.width,
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: Color.fromRGBO(0, 149, 235, 1)),
+                      onPressed: () {
+                        controller.pageController.nextPage(
+                            duration: 300.milliseconds, curve: Curves.ease);
+                      },
+                      child: const Text("Start Tutorial")),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class Tutorial extends StatefulWidget {
   const Tutorial({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -108,41 +161,59 @@ class Tutorial extends StatefulWidget {
 }
 
 class _TutorialState extends State<Tutorial> {
-  final MainController controller = Get.find();
-
   @override
   Widget build(BuildContext context) {
+    final MainController controller = Get.find();
     return Scaffold(
+        backgroundColor: Colors.black,
         body: SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                    width: Get.width,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          controller.pageController.nextPage(
-                              duration: 300.milliseconds, curve: Curves.ease);
-                        },
-                        child: const Text("Start Capture"))))
-          ],
-        ),
-      ),
-    ));
+          child: Stack(
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // mainAxisSize: MainAxisSize.max,
+            children: [
+              // Text(
+              //   widget.title,
+              //   style: Theme.of(context).textTheme.bodyLarge,
+              // ),
+              // const SizedBox(
+              //   height: 40,
+              // ),
+              Positioned(
+                left: 80,
+                top: 200,
+                child: Container(
+                  color: Colors.black,
+                  child: Image.asset(
+                    "assets/images/drive_license_front_shooting.gif",
+                    width: 400,
+                    height: 250,
+                  ),
+                ),
+              ),
+              // const SizedBox(
+              //   height: 20,
+              // ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 50.0, horizontal: 8),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                      width: Get.width,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            controller.pageController.nextPage(
+                                duration: 300.milliseconds, curve: Curves.ease);
+                          },
+                          child: const Text("Start Capture"))),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+        ));
   }
 }
 
