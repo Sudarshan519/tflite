@@ -78,18 +78,19 @@ class _CaptureImageState extends State<CaptureImage> {
   loadmodel() async {
     var path = widget.type == "FrontCapture"
         ? 'assets/front/model_unquant.tflite'
-        // : widget.type == "BackCapture"
-        //     ? 'assets/back/model_unquant.tflite'
-        : widget.type == "TiltedImage"
-            ? 'assets/tilted/model_unquant.tflite'
-            : 'assets/model_unquant.tflite';
+        : widget.type == "BackCapture"
+            ? 'assets/back/model_unquant.tflite'
+            : widget.type == "TiltedImage"
+                ? 'assets/tilted/model_unquant.tflite'
+                : 'assets/model_unquant.tflite';
     var labels = widget.type == "FrontCapture"
         ? 'assets/front/labels.txt'
-        // : widget.type == "BackCapture"
-        //     ? 'assets/front/labels.txt'
-        : widget.type == "TiltedImage"
-            ? 'assets/tilted/labels.txt'
-            : 'assets/labels.txt';
+        : widget.type == "BackCapture"
+            ? 'assets/back/labels.txt'
+            : widget.type == "TiltedImage"
+                ? 'assets/tilted/labels.txt'
+                : 'assets/labels.txt';
+    print(path + label);
     await Tflite.loadModel(model: path, labels: labels);
 
     modelReady = true;
@@ -123,11 +124,13 @@ class _CaptureImageState extends State<CaptureImage> {
         });
       }
       for (var element in predictions ?? []) {
-        if (element['confidence'] > .90) {
-          print(element);
+        print(element);
+        if (element['confidence'] > .60) {
           if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
-            if (label == "0 Front") if (!timerInitialized) {
-              startTimer();
+            if (label == "0 Front") {
+              if (!timerInitialized) {
+                startTimer();
+              }
             }
             if (label != element['label']) {
               isDetected = true;
@@ -138,9 +141,11 @@ class _CaptureImageState extends State<CaptureImage> {
               }
             }
           } else if (widget.type == "BackCapture" &&
-              element['label'] == "1 Back") {
-            if (label == "1 Back") if (!timerInitialized) {
-              startTimer();
+              element['label'] == "0 Back") {
+            if (label == "0 Back") {
+              if (!timerInitialized) {
+                startTimer();
+              }
             }
             if (label != element['label']) {
               isDetected = true;
@@ -151,7 +156,12 @@ class _CaptureImageState extends State<CaptureImage> {
               }
             }
           } else if (widget.type == "TiltedImage" &&
-              element['label'] == "2 Tilted") {
+              element['label'] == "1 Tilted") {
+            if (label == "1 Tilted") {
+              if (!timerInitialized) {
+                startTimer();
+              }
+            }
             if (label != element['label']) {
               isDetected = true;
               if (mounted) {
@@ -164,10 +174,11 @@ class _CaptureImageState extends State<CaptureImage> {
             label = "";
             if (label != "") {
               isDetected = false;
-              if (mounted)
+              if (mounted) {
                 setState(() {
                   label = "";
                 });
+              }
             }
           }
         }
@@ -179,13 +190,13 @@ class _CaptureImageState extends State<CaptureImage> {
   @override
   void initState() {
     super.initState();
-    _streamSubscriptions.add(accelerometerEvents.listen((data) {
-      // print(data);
-      x = data.x.floor();
-      y = data.y.floor();
-      z = data.z.round();
-      checkAngle(data);
-    }, onError: (err) {}, onDone: () {}));
+    // _streamSubscriptions.add(accelerometerEvents.listen((data) {
+    //   // print(data);
+    //   x = data.x.floor();
+    //   y = data.y.floor();
+    //   z = data.z.round();
+    //   checkAngle(data);
+    // }, onError: (err) {}, onDone: () {}));
     getAvailableCamera();
 
     setState(() {});
@@ -193,16 +204,17 @@ class _CaptureImageState extends State<CaptureImage> {
 
   startTimer() {
     print("starting timer");
-
-    timer = Timer.periodic(1.seconds, (t) {
-      if (value > 2) {
-        takePicture(image);
-        timer.cancel();
-      } else {
-        value++;
-      }
-      setState(() {});
-    });
+    if (!timerInitialized) {
+      timer = Timer.periodic(1.seconds, (t) {
+        if (value > 2) {
+          takePicture(image);
+          timer.cancel();
+        } else {
+          value++;
+        }
+        setState(() {});
+      });
+    }
 
     timerInitialized = true;
     setState(() {});
@@ -241,8 +253,6 @@ class _CaptureImageState extends State<CaptureImage> {
       // print("portrait");
       if (isCapturing) return;
     } else if (x == 0 && y == 7 && z == 0) {
-      // resetTimer();
-      // print("45 degree detected");
       if (widget.type == "TiltedImage") {
         if (!timerInitialized) {
           startTimer();
@@ -254,7 +264,7 @@ class _CaptureImageState extends State<CaptureImage> {
           phone = "45 degree";
         });
       }
-      // print("portrait");
+
       if (isCapturing) return;
     } else if (x == 0 && y == 7 && z == 7) {
       if (widget.type == "TiltedImage") {

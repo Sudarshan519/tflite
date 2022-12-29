@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:flutter_face_verification/main_screen.dart';
 import 'package:flutter_face_verification/screens/liveliness_detection_screen.dart';
+import 'package:flutter_face_verification/test_live.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
@@ -30,12 +31,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home:
-          //  MyHomePage(
-          //   title: "",
-          // )
-          MainScreen(),
-      // LivelinessDetection(),
-      // FaceDetection(),
+          // MainScreen(),
+          Liveliness(),
     );
   }
 }

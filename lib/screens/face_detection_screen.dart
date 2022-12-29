@@ -54,7 +54,6 @@ class _FaceDetectionState extends State<FaceDetection> {
     Directory appDocDir = await getApplicationDocumentsDirectory();
     String appDocPath = appDocDir.path;
 
-    // print(appDocPath);
     var file = File(
         "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
     await file.writeAsBytes(image);
@@ -112,15 +111,14 @@ class _FaceDetectionState extends State<FaceDetection> {
     );
     isPredicting = false;
     for (var element in predictions!) {
-      print(element);
       if (element['confidence'] > .80 &&
           element['label'] == "0 Face Detected") {
         faceDetected = true;
 
         if (!timerInitialized) {
-          timer = Timer.periodic(const Duration(seconds: 5), (t) {
+          timer = Timer.periodic(const Duration(seconds: 2), (t) {
             if (faceDetected) {
-              if (value == 5) {
+              if (value == 2) {
                 if (!captured) takePicture(image);
                 t.cancel();
                 timer.cancel();
@@ -159,16 +157,29 @@ class _FaceDetectionState extends State<FaceDetection> {
         //face bounding box
         if (!captured)
           Center(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                    width: 2, color: faceDetected ? Colors.green : Colors.grey),
-              ),
-              height: 404,
-              width: 304,
-              child: Text(value.toString()),
-            ),
+            child: faceDetected
+                ? Image.asset(
+                    "assets/images/camera_frame_active.webp",
+                    height: 380,
+                    width: 380,
+                  )
+                : Image.asset(
+                    "assets/images/camera_frame_inactive.webp",
+                    height: 380,
+                    width: 380,
+                  ),
           )
+        // Center(
+        //   child: Container(
+        //     decoration: BoxDecoration(
+        //       border: Border.all(
+        //           width: 2, color: faceDetected ? Colors.green : Colors.grey),
+        //     ),
+        //     height: 404,
+        //     width: 304,
+        //     child: Text(value.toString()),
+        //   ),
+        // )
         else
           loading ? const CircularProgressIndicator() : Image.file(File(path))
       ]),

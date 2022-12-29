@@ -62,6 +62,7 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
+    // const FaceDetection(),
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: "FrontTutorial"),
@@ -277,9 +278,7 @@ class _ConfirmationState extends State<Confirmation> {
                             ? controller.tilted.value
                             : controller.selfie.value,
               ),
-              height: 300,
-              width: 320,
-              fit: BoxFit.fitWidth,
+              // fit: BoxFit.fitWidth,
             ),
             Padding(
               padding: const EdgeInsets.all(20.0),

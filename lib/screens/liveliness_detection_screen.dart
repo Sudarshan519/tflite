@@ -43,15 +43,14 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   final MainController controller = Get.put(MainController()); // Get.find();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initializeCamera();
   }
 
   loadModel() async {
     await Tflite.loadModel(
-        model: 'assets/eyes/model_unquant.tflite',
-        labels: 'assets/eyes/labels.txt');
+        model: 'assets/eye1/model_unquant.tflite',
+        labels: 'assets/eye1/labels.txt');
 
     modelReady = true;
     setState(() {});
@@ -97,85 +96,44 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        if (cameraInitialized) Center(child: CameraPreview(cameraController)),
-        Center(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                  width: 2,
-                  color: eye == "Blink Detected" ? Colors.green : Colors.grey),
-            ),
-            height: 304,
-            width: 304,
-            child: Text(eye,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: Colors.white, shadows: <Shadow>[
-                  const Shadow(
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 3.0,
-                    color: Color.fromARGB(255, 0, 0, 0),
+      body: Container(
+        color: Colors.black,
+        child: Stack(children: [
+          if (cameraInitialized) Center(child: CameraPreview(cameraController)),
+          Center(
+              child: AnimatedContainer(
+            duration: 600.milliseconds,
+            child: eye == "Blink Detected"
+                ? Image.asset(
+                    "assets/images/camera_frame_active.webp",
+                    height: 380,
+                    width: 380,
+                  )
+                : Image.asset(
+                    "assets/images/camera_frame_inactive.webp",
+                    height: 380,
+                    width: 380,
                   ),
-                  const Shadow(
-                    offset: Offset(1.5, 1.5),
-                    blurRadius: 3.0,
-                    color: Color.fromARGB(255, 193, 16, 16),
-                  ),
-                ])),
+          )),
+          Center(
+            child: SizedBox(
+                height: 304,
+                width: 304,
+                child: Image.asset(eye != "Blink Detected"
+                    ? "assets/images/face_mark_eyes_close.webp"
+                    : "assets/images/face_mark_eyes_open.webp")),
           ),
-        ),
-        Center(
-            child: Text(
-          eye,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(color: Colors.white, shadows: <Shadow>[
-            const Shadow(
-              offset: Offset(1.0, 1.0),
-              blurRadius: 3.0,
-              color: Color.fromARGB(255, 0, 0, 0),
-            ),
-            const Shadow(
-              offset: Offset(1.5, 1.5),
-              blurRadius: 3.0,
-              color: Color.fromARGB(255, 193, 16, 16),
-            ),
-          ]),
-        )),
-        Center(
-            child: Text(
-          blinkDetected ? "Blink Detected" : "",
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(color: Colors.white, shadows: <Shadow>[
-            const Shadow(
-              offset: Offset(1.0, 1.0),
-              blurRadius: 3.0,
-              color: Color.fromARGB(255, 0, 0, 0),
-            ),
-            const Shadow(
-              offset: Offset(1.5, 1.5),
-              blurRadius: 3.0,
-              color: Color.fromARGB(255, 193, 16, 16),
-            ),
-          ]),
-        )),
-        if (image != null) Image.memory(image),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            // Text(eye),
-            // if (detectedBlinks.isNotEmpty)
-            Obx(() => Text(controller.blinks.toString())),
-            const Text("Delay"),
-            Text(predictionTime.toString())
-          ]),
-        )
-      ]),
+          if (image != null) Image.memory(image),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Obx(() => Text(controller.blinks.toString())),
+              const Text("Delay"),
+              Text(predictionTime.toString())
+            ]),
+          )
+        ]),
+      ),
     );
   }
 
@@ -201,11 +159,11 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       predictionTime = currentTimeStamp - timeStamp;
 
       for (var element in predictions!) {
-        if (element['confidence'] > .50 &&
-            element['label'] != "2 Not Detected") {
+        print(element);
+        if (element['confidence'] > .50 && element['label'] != "2 Error") {
           if (detected != element['label']) {
             controller.blinks = controller.blinks + 1;
-            if (detectedBlinks.length > 10) {
+            if (detectedBlinks.length > 5) {
               takePicture(image);
             }
             detectedBlinks.add(element);
