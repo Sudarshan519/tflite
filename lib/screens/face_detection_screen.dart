@@ -30,6 +30,7 @@ class _FaceDetectionState extends State<FaceDetection> {
   var path = "";
   var loading = false;
   var nextPage = false;
+  var cameraImage;
   final MainController controller = Get.find();
   @override
   void initState() {
@@ -40,7 +41,10 @@ class _FaceDetectionState extends State<FaceDetection> {
 
   loadModel() async {
     await Tflite.loadModel(
-        model: 'assets/model_face.tflite', labels: 'assets/labels_face.txt');
+        model:
+            // "assets/face/model_unquant.tflite",
+            'assets/model_face.tflite',
+        labels: 'assets/labels_face.txt');
 
     modelReady = true;
     setState(() {});
@@ -72,7 +76,7 @@ class _FaceDetectionState extends State<FaceDetection> {
     // setState(() {});
     loadModel();
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.max);
+    cameraController = CameraController(cameras[1], ResolutionPreset.low);
     await cameraController.initialize().then((_) {
       cameraInitialized = true;
 
@@ -114,29 +118,29 @@ class _FaceDetectionState extends State<FaceDetection> {
       if (element['confidence'] > .80 &&
           element['label'] == "0 Face Detected") {
         faceDetected = true;
-
-        if (!timerInitialized) {
-          timer = Timer.periodic(const Duration(seconds: 2), (t) {
-            if (faceDetected) {
-              if (value == 2) {
-                if (!captured) takePicture(image);
-                t.cancel();
-                timer.cancel();
-              } else {
-                value++;
-                if (mounted) setState(() {});
-              }
-            } else {
-              t.cancel();
-              timer.cancel();
-              value = 0;
-            }
-          });
-        } else {
-          if (timerInitialized && captured) {
-            timer.cancel();
-          }
-        }
+        cameraImage = image;
+        // if (!timerInitialized) {
+        //   timer = Timer.periodic(const Duration(seconds: 2), (t) {
+        //     if (faceDetected) {
+        //       if (value == 2) {
+        //         if (!captured) takePicture(image);
+        //         t.cancel();
+        //         timer.cancel();
+        //       } else {
+        //         value++;
+        //         if (mounted) setState(() {});
+        //       }
+        //     } else {
+        //       t.cancel();
+        //       timer.cancel();
+        //       value = 0;
+        //     }
+        //   });
+        // } else {
+        //   if (timerInitialized && captured) {
+        //     timer.cancel();
+        //   }
+        // }
         if (mounted) setState(() {});
       } else {
         if (timerInitialized) timer.cancel();
@@ -150,39 +154,64 @@ class _FaceDetectionState extends State<FaceDetection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        // camera
-        if (!captured)
-          if (cameraInitialized) Center(child: CameraPreview(cameraController)),
-        //face bounding box
-        if (!captured)
-          Center(
-            child: faceDetected
-                ? Image.asset(
-                    "assets/images/camera_frame_active.webp",
-                    height: 380,
-                    width: 380,
-                  )
-                : Image.asset(
-                    "assets/images/camera_frame_inactive.webp",
-                    height: 380,
-                    width: 380,
-                  ),
+      body: Container(
+        color: Colors.black,
+        child: Stack(children: [
+          // camera
+          if (!captured)
+            if (cameraInitialized)
+              Center(child: CameraPreview(cameraController)),
+          //face bounding box
+          if (!captured)
+            Center(
+              child: faceDetected
+                  ? Image.asset(
+                      "assets/images/camera_frame_active.webp",
+                      height: 380,
+                      width: 380,
+                    )
+                  : Image.asset(
+                      "assets/images/camera_frame_inactive.webp",
+                      height: 380,
+                      width: 380,
+                    ),
+            )
+          // Center(
+          //   child: Container(
+          //     decoration: BoxDecoration(
+          //       border: Border.all(
+          //           width: 2, color: faceDetected ? Colors.green : Colors.grey),
+          //     ),
+          //     height: 404,
+          //     width: 304,
+          //     child: Text(value.toString()),
+          //   ),
+          // )
+          else
+            loading
+                ? const CircularProgressIndicator()
+                : Image.file(File(path)),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: InkWell(
+                onTap: () {
+                  takePicture(cameraImage);
+                },
+                child: Image.asset(
+                  faceDetected
+                      ? "assets/images/camera_button_active.webp"
+                      : "assets/images/camera_button_inactive.webp",
+                  height: 60,
+                  width: 60,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
           )
-        // Center(
-        //   child: Container(
-        //     decoration: BoxDecoration(
-        //       border: Border.all(
-        //           width: 2, color: faceDetected ? Colors.green : Colors.grey),
-        //     ),
-        //     height: 404,
-        //     width: 304,
-        //     child: Text(value.toString()),
-        //   ),
-        // )
-        else
-          loading ? const CircularProgressIndicator() : Image.file(File(path))
-      ]),
+        ]),
+      ),
     );
   }
 }

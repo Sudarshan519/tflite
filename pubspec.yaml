@@ -34,6 +34,7 @@ dependencies:
   get: ^4.6.5
   image: ^3.1.3
   image_cropper: ^3.0.1
+  image_picker: ^0.8.6
   path_provider: ^2.0.11
   sensors_plus: ^2.0.0
   tflite: ^1.1.2
@@ -62,6 +63,7 @@ flutter:
     - assets/tilted/
     - assets/quantized/
     - assets/eye1/
+    - assets/eye2/
     - assets/back_rc/
     - assets/face/
     # - assets/tilted/

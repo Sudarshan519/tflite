@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_face_verification/captured_image.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:tflite/tflite.dart';
 
 class LivelinessDetection extends StatefulWidget {
@@ -35,18 +37,58 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   var predictionTime = 0;
   var timeStamp = 0;
   var runtime = 0;
+  var cameraImage;
   var image;
-  var detected;
+  var detected = false;
+  var eyesClosed = false;
   var blinks = 0;
 
-  var eye = 'Not Detected';
-  final MainController controller = Get.put(MainController()); // Get.find();
+  final List<StreamSubscription<dynamic>> _streamSubscriptions =
+      <StreamSubscription<dynamic>>[];
+  int x = 0, y = 0, z = 0;
+  var eye;
+  final MainController controller = Get.put(MainController());
+
+  int blinkTimeStamp = 0; // Get.find();
+  var predict;
   @override
   void initState() {
     super.initState();
     initializeCamera();
+    // _streamSubscriptions.add(accelerometerEvents.listen((data) {
+    //   checkAngle(data);
+    // }, onError: (err) {}, onDone: () {}));
   }
 
+  void checkAngle(AccelerometerEvent data) {
+    if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
+      print("STABLE");
+      print("STABLE ${detectedBlinks.length}");
+      if (detectedBlinks.length > 0) {
+        if (cameraImage != null) takePicture(cameraImage);
+      }
+    } else {
+      x = data.x.round();
+      y = data.y.round();
+      z = data.z.round();
+      clearBlinks();
+    }
+  }
+
+  /// clear blinks
+  clearBlinks() {
+    eye = "";
+    Future.delayed(2.seconds, () {
+      eyesClosed = false;
+      blinkDetected = false;
+      setState(() {});
+    });
+    blinkDetected = false;
+    detectedBlinks.clear();
+    setState(() {});
+  }
+
+  /// load tflite model
   loadModel() async {
     await Tflite.loadModel(
         model: 'assets/eye1/model_unquant.tflite',
@@ -56,22 +98,24 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     setState(() {});
   }
 
+  /// take picture
   takePicture(cameraImage) async {
     loading = true;
 
-    image = await convertYUV420toImageColor(cameraImage);
-    cameraController.dispose();
-    cameraInitialized = false;
-    if (mounted) setState(() {});
+    // image = await convertYUV420toImageColor(cameraImage);
+    // cameraController.dispose();
+    // cameraInitialized = false;
+    // if (mounted) setState(() {});
     loading = false;
     if (!nextPage) controller.nextPage();
     nextPage = true;
   }
 
+  /// initialize camera module and load model
   initializeCamera() async {
     loadModel();
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.medium);
+    cameraController = CameraController(cameras[1], ResolutionPreset.ultraHigh);
     await cameraController.initialize().then((_) {
       cameraInitialized = true;
 
@@ -93,6 +137,20 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     });
   }
 
+  runModelOnImage() async {
+    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    var predictions = await Tflite.runModelOnImage(path: image!.path);
+    print(predictions!.first);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,37 +159,60 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
         child: Stack(children: [
           if (cameraInitialized) Center(child: CameraPreview(cameraController)),
           Center(
-              child: AnimatedContainer(
-            duration: 600.milliseconds,
-            child: eye == "Blink Detected"
-                ? Image.asset(
-                    "assets/images/camera_frame_active.webp",
-                    height: 380,
-                    width: 380,
-                  )
-                : Image.asset(
-                    "assets/images/camera_frame_inactive.webp",
-                    height: 380,
-                    width: 380,
-                  ),
-          )),
-          Center(
-            child: SizedBox(
-                height: 304,
-                width: 304,
-                child: Image.asset(eye != "Blink Detected"
-                    ? "assets/images/face_mark_eyes_close.webp"
-                    : "assets/images/face_mark_eyes_open.webp")),
+            child: AnimatedContainer(
+              duration: 600.milliseconds,
+              child: detected
+                  ? Image.asset(
+                      "assets/images/camera_frame_active.webp",
+                      height: 380,
+                      width: 380,
+                    )
+                  : Image.asset(
+                      "assets/images/camera_frame_inactive.webp",
+                      height: 380,
+                      width: 380,
+                    ),
+            ),
           ),
+          if (detected)
+            Center(
+              child: SizedBox(
+                  height: 304,
+                  width: 304,
+                  child: Image.asset(eyesClosed
+                      ? "assets/images/face_mark_eyes_close.webp"
+                      : "assets/images/face_mark_eyes_open.webp")),
+            ),
+          if (detected)
+            Text(
+              eyesClosed ? "EYES CLOSED" : "EYES OPEN",
+              style: const TextStyle(color: Colors.white),
+            ),
           if (image != null) Image.memory(image),
           Align(
             alignment: Alignment.bottomCenter,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Obx(() => Text(controller.blinks.toString())),
+              Text(
+                predict.toString(),
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                eye.toString(),
+                style: TextStyle(color: Colors.white),
+              ),
+              Obx(() => Text(
+                    controller.blinks.toString(),
+                    style: TextStyle(color: Colors.white),
+                  )),
               const Text("Delay"),
               Text(predictionTime.toString())
             ]),
-          )
+          ),
+          ElevatedButton(
+              onPressed: () {
+                runModelOnImage();
+              },
+              child: Text("PickImage"))
         ]),
       ),
     );
@@ -155,53 +236,94 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
         threshold: .1,
         asynch: true,
       );
+      predict = predictions;
+      setState(() {});
       var currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
       predictionTime = currentTimeStamp - timeStamp;
 
-      for (var element in predictions!) {
-        print(element);
-        if (element['confidence'] > .50 && element['label'] != "2 Error") {
-          if (detected != element['label']) {
-            controller.blinks = controller.blinks + 1;
-            if (detectedBlinks.length > 5) {
-              takePicture(image);
-            }
-            detectedBlinks.add(element);
+      var element = predictions!.first;
+      print(element);
+      {
+        //   if (element['label'] == "2 Error") {
+        //     eye = element['label'];
+        //     detected = false;
+        //     eyesClosed = false;
+        //     setState(() {});
+        //   } else if (element['label'] == "0 Eyes Open") {
+        //     blinkTimeStamp = DateTime.now().millisecondsSinceEpoch;
+        //     eye = element['label'];
+        //     if (!eyesClosed) {
+        //       detected = true;
+        //       eyesClosed = false;
+        //       setState(() {});
+        //     }
+        //   } else {
+        //     eye = element['label'];
+        //     print("CLOSED");
+        //     print(element);
+        //     eyesClosed = true;
+        //     // Future.delayed(3.seconds, () {
+        //     //   eyesClosed = false;
+        //     // });
+        //     setState(() {});
+        //     // Future.delayed(2.seconds, () {
+        //     //   setState(() {
+        //     //     eyesClosed = false;
+        //     //   });
+        //     // });
 
-            setState(() {});
-          }
-          detected = element['label'];
+        //     // addBlink(element);
+        //     eye = element['label'];
+        //   }
+        //   setState(() {});
+        // if (element['label'] != "2 Error") {
+        //   if (element['confidence'] > .50) {
+        //     if (eye != null && eye != element['label']) {
+        //       eye = element['label'];
 
-          if (element['label'] == "0 Eyes Open") {
-            eye = "Blink Detected";
-            // blinks++;
-            // if (blinks > 4) {
-            //   takePicture(image);
-            // }
-            Future.delayed(const Duration(seconds: 1), () {
-              eye = "";
-            });
-            blinkDetected = true;
-          } else {
-            eye = "";
-            blinkDetected = false;
-          }
-          if (mounted) setState(() {});
-          if (detected != element['label']) {
-            // takePicture(image);
-            detected = element['label'];
-            if (detectedBlinks.length > 10) {
-              takePicture(image);
-            }
-          }
-        } else {
-          Future.delayed(
-              const Duration(
-                seconds: 3,
-              ), () {
-            blinkDetected = false;
-          });
-        }
+        //       if ((DateTime.now().millisecondsSinceEpoch - blinkTimeStamp) >
+        //           2000) {
+        //         blinkTimeStamp = DateTime.now().millisecondsSinceEpoch;
+        //         cameraImage = image;
+        //         addBlink(element);
+        //       }
+        //     }
+
+        //     if (element['label'] == "0 Eyes Open") {
+        //       eye = "Blink Detected";
+
+        //       Future.delayed(const Duration(seconds: 1), () {
+        //         eye = "";
+        //       });
+        //       blinkDetected = true;
+        //     }
+        //     // else {
+        //     //   eye = "";
+        //     //   detectedBlinks.add(element);
+        //     //   blinkDetected = false;
+        //     // }
+        //     if (mounted) setState(() {});
+        //     // if (detected != element['label']) {
+        //     //   // takePicture(image);
+        //     //   detected = element['label'];
+        //     //   if (detectedBlinks.length > 10) {
+        //     //     takePicture(image);
+        //     //   }
+        //     // }
+        //   }
+        // }
+
+        // /// ERROR CASE OR LOW CONFIDENCE
+        // else {
+        //   // clearBlinks();
+
+        //   // Future.delayed(
+        //   //     const Duration(
+        //   //       seconds: 3,
+        //   //     ), () {
+        //   //   blinkDetected = false;
+        //   // });
+        // }
       }
       isPredicting = false;
     } catch (e) {
@@ -209,5 +331,18 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
         print(e.toString());
       }
     }
+  }
+
+  void addBlink(element) {
+    controller.blinks = controller.blinks + 1;
+    detectedBlinks.add(element);
+    if (detectedBlinks.length > 1) {
+      takePicture(image);
+    } else {
+      detectedBlinks.add(element);
+      print(detectedBlinks.length);
+    }
+
+    setState(() {});
   }
 }

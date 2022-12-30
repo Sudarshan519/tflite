@@ -62,7 +62,7 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
-    // const FaceDetection(),
+    const LivelinessDetection(),
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: "FrontTutorial"),
@@ -77,10 +77,8 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const Tutorial(title: "SelfieTutorial"),
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
-
     const Tutorial(title: "Liveliness Tutorial"),
     const LivelinessDetection(),
-    // const Confirmation(type: "Liveliness Tutorial"),
     const DocumentConfirmation()
   ];
 
@@ -137,7 +135,7 @@ class IntroSecond extends StatelessWidget {
                   width: Get.width,
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          primary: Color.fromRGBO(0, 149, 235, 1)),
+                          primary: const Color.fromRGBO(0, 149, 235, 1)),
                       onPressed: () {
                         controller.pageController.nextPage(
                             duration: 300.milliseconds, curve: Curves.ease);
@@ -169,16 +167,7 @@ class _TutorialState extends State<Tutorial> {
         backgroundColor: Colors.black,
         body: SafeArea(
           child: Stack(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            // mainAxisSize: MainAxisSize.max,
             children: [
-              // Text(
-              //   widget.title,
-              //   style: Theme.of(context).textTheme.bodyLarge,
-              // ),
-              // const SizedBox(
-              //   height: 40,
-              // ),
               Positioned(
                 left: 80,
                 top: 200,
@@ -191,9 +180,6 @@ class _TutorialState extends State<Tutorial> {
                   ),
                 ),
               ),
-              // const SizedBox(
-              //   height: 20,
-              // ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 50.0, horizontal: 8),
@@ -278,7 +264,6 @@ class _ConfirmationState extends State<Confirmation> {
                             ? controller.tilted.value
                             : controller.selfie.value,
               ),
-              // fit: BoxFit.fitWidth,
             ),
             Padding(
               padding: const EdgeInsets.all(20.0),
