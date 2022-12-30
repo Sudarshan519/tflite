@@ -8,14 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:flutter_face_verification/main_screen.dart';
-import 'package:flutter_face_verification/screens/liveliness_detection_screen.dart';
-import 'package:flutter_face_verification/test_live.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:ui' as ui;
 import 'captured_image.dart';
-import 'screens/face_detection_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,9 +27,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:
-          // MainScreen(),
-          Liveliness(),
+      home: MainScreen(),
+      // Liveliness(),
     );
   }
 }
