@@ -1,9 +1,9 @@
 on:
   # 2
   push:
-    branches: [ "main" ]
+    branches: [ "main" ,"tilted_model"]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main","tilted_model" ]
  # workflow_dispatch:
 
 # 4
