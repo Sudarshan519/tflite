@@ -86,7 +86,7 @@ class _IntroScreenState extends State<IntroScreen> {
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
-              Divider(),
+              const Divider(),
               const SizedBox(
                 height: 20,
               ),
@@ -105,12 +105,12 @@ class _IntroScreenState extends State<IntroScreen> {
               const SizedBox(
                 height: 20,
               ),
-              Divider(),
+              const Divider(),
               SizedBox(
                 width: Get.width,
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: Color.fromRGBO(0, 149, 235, 1)),
+                        primary: const Color.fromRGBO(0, 149, 235, 1)),
                     onPressed: () {
                       controller.pageController.nextPage(
                           duration: 300.milliseconds, curve: Curves.ease);

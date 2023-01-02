@@ -83,7 +83,7 @@ convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
       // List<int> trimRect;
       // var img1 = imglib.Image(400, 200);
       // trimRect = findTrim(img1, mode: TrimMode.transparent, sides: Trim.all);
-      img = imglib.copyCrop(img, 20, 180, 400, 320);
+      img = imglib.copyCrop(img, 20, 180, 420, 300);
     }
     // img = imglib.copyCrop(img, 20, 500, 500, 320);
     imglib.PngEncoder pngEncoder = new imglib.PngEncoder(level: 0, filter: 0);

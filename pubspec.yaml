@@ -64,6 +64,7 @@ flutter:
     - assets/quantized/
     - assets/eye1/
     - assets/eye2/
+    - assets/eye3/
     - assets/back_rc/
     - assets/face/
     # - assets/tilted/

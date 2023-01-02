@@ -269,6 +269,8 @@ class _ConfirmationState extends State<Confirmation> {
               padding: const EdgeInsets.all(20.0),
               child: Text(base64.substring(0, 200)),
             ),
+            if (widget.type == "SelfieCapture")
+              Image.asset("assets/images/fail_pattern.webp"),
             Text(
               "Decoded Image",
               style: Theme.of(context).textTheme.bodyLarge,
@@ -294,12 +296,10 @@ class _ConfirmationState extends State<Confirmation> {
                       child: const Text("Retake")),
                   OutlinedButton(
                       onPressed: () {
-                        // pagecontroller.previousPage(
-                        //     duration: 300.milliseconds, curve: Curves.ease);
                         controller.pageController.nextPage(
                             duration: 300.milliseconds, curve: Curves.ease);
                       },
-                      child: Text("Next"))
+                      child: const Text("Next"))
                 ],
               ),
             )
@@ -331,89 +331,88 @@ class _DocumentConfirmationState extends State<DocumentConfirmation> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Obx(
-            () => Column(
-              children: [
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "Front Image",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Image.file(
-                  File(controller.frontImage.value),
-                  height: 300,
-                  width: 320,
-                  fit: BoxFit.cover,
-                ),
-                Text(controller.frontImageByte.value.substring(0, 100)),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "Back Image",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(controller.backImageByte.value.substring(0, 100)),
-                Image.file(
-                  File(controller.backImage.value),
-                  height: 300,
-                  width: 320,
-                  fit: BoxFit.cover,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "Tilted Image",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Image.file(
-                  File(controller.tilted.value),
-                  height: 300,
-                  width: 320,
-                  fit: BoxFit.cover,
-                ),
-                Text(controller.tiltedByte.value.substring(0, 100)),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  "Selfie Image",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Image.file(
-                  File(controller.selfie.value),
-                  height: 300,
-                  width: 320,
-                  fit: BoxFit.cover,
-                ),
-                Text(controller.selfieByte.value.substring(0, 100)),
-                ElevatedButton(
-                    onPressed: () async {
-                      PageController pagecontroller = controller.pageController;
-                      pagecontroller.previousPage(
-                          duration: 300.milliseconds, curve: Curves.ease);
-                      pagecontroller.previousPage(
-                          duration: 300.milliseconds, curve: Curves.ease);
-                      // await Get.delete<MainController>();
-
-                      // Get.offAll(() => MainScreen());
-                    },
-                    child: const Text("Submit"))
-              ],
+            () => Center(
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Front Image",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Image.file(
+                    File(controller.frontImage.value),
+                    height: 200,
+                    width: 320,
+                    fit: BoxFit.fill,
+                  ),
+                  // Text(controller.frontImageByte.value.substring(0, 100)),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Back Image",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // Text(controller.backImageByte.value.substring(0, 100)),
+                  Image.file(
+                    File(controller.backImage.value),
+                    height: 200,
+                    width: 320,
+                    fit: BoxFit.fill,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Tilted Image",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Image.file(
+                    File(controller.tilted.value),
+                    height: 200,
+                    width: 320,
+                    fit: BoxFit.fill,
+                  ),
+                  // Text(controller.tiltedByte.value.substring(0, 100)),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Selfie Image",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Image.file(
+                    File(controller.selfie.value),
+                    width: 320,
+                    fit: BoxFit.cover,
+                  ),
+                  // Text(controller.selfieByte.value.substring(0, 100)),
+                  ElevatedButton(
+                      onPressed: () async {
+                        PageController pagecontroller =
+                            controller.pageController;
+                        pagecontroller.previousPage(
+                            duration: 300.milliseconds, curve: Curves.ease);
+                        pagecontroller.previousPage(
+                            duration: 300.milliseconds, curve: Curves.ease);
+                      },
+                      child: const Text("Submit"))
+                ],
+              ),
             ),
           ),
         ),

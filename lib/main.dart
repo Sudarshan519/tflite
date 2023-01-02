@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_face_verification/controller.dart';
-import 'package:flutter_face_verification/main_screen.dart';
-import 'package:flutter_face_verification/test_live.dart';
+import 'package:flutter_face_verification/main_screen.dart'; 
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
@@ -180,9 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
   convertToByte64() {
     var bytes = File(image!.path).readAsBytesSync();
     base64 = base64Encode(bytes);
-    return base64;
-    // setState(() {});
-    // print(base64);
+    return base64; 
   }
 
   validateImage() {

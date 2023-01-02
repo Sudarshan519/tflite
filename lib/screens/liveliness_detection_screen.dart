@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_face_verification/captured_image.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -55,16 +54,16 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   void initState() {
     super.initState();
     initializeCamera();
-    // _streamSubscriptions.add(accelerometerEvents.listen((data) {
-    //   checkAngle(data);
-    // }, onError: (err) {}, onDone: () {}));
+    _streamSubscriptions.add(accelerometerEvents.listen((data) {
+      checkAngle(data);
+    }, onError: (err) {}, onDone: () {}));
   }
 
   void checkAngle(AccelerometerEvent data) {
     if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
-      print("STABLE");
-      print("STABLE ${detectedBlinks.length}");
-      if (detectedBlinks.length > 0) {
+      // print("STABLE");
+      // print("STABLE ${detectedBlinks.length}");
+      if (detectedBlinks.isNotEmpty) {
         if (cameraImage != null) takePicture(cameraImage);
       }
     } else {
@@ -81,7 +80,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     Future.delayed(2.seconds, () {
       eyesClosed = false;
       blinkDetected = false;
-      setState(() {});
+      if (mounted) setState(() {});
     });
     blinkDetected = false;
     detectedBlinks.clear();
@@ -91,7 +90,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   /// load tflite model
   loadModel() async {
     await Tflite.loadModel(
-        model: 'assets/eye1/model_unquant.tflite',
+        model: 'assets/eye3/model_unquant.tflite',
         labels: 'assets/eye1/labels.txt');
 
     modelReady = true;
@@ -100,13 +99,13 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
   /// take picture
   takePicture(cameraImage) async {
-    loading = true;
+    // loading = true;
 
     // image = await convertYUV420toImageColor(cameraImage);
     // cameraController.dispose();
     // cameraInitialized = false;
     // if (mounted) setState(() {});
-    loading = false;
+    // loading = false;
     if (!nextPage) controller.nextPage();
     nextPage = true;
   }
@@ -156,64 +155,68 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     return Scaffold(
       body: Container(
         color: Colors.black,
-        child: Stack(children: [
-          if (cameraInitialized) Center(child: CameraPreview(cameraController)),
-          Center(
-            child: AnimatedContainer(
-              duration: 600.milliseconds,
-              child: detected
-                  ? Image.asset(
-                      "assets/images/camera_frame_active.webp",
-                      height: 380,
-                      width: 380,
-                    )
-                  : Image.asset(
-                      "assets/images/camera_frame_inactive.webp",
-                      height: 380,
-                      width: 380,
-                    ),
-            ),
-          ),
-          if (detected)
+        child: SafeArea(
+          child: Stack(children: [
+            if (cameraInitialized)
+              Center(child: CameraPreview(cameraController)),
             Center(
-              child: SizedBox(
-                  height: 304,
-                  width: 304,
-                  child: Image.asset(eyesClosed
-                      ? "assets/images/face_mark_eyes_close.webp"
-                      : "assets/images/face_mark_eyes_open.webp")),
-            ),
-          if (detected)
-            Text(
-              eyesClosed ? "EYES CLOSED" : "EYES OPEN",
-              style: const TextStyle(color: Colors.white),
-            ),
-          if (image != null) Image.memory(image),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text(
-                predict.toString(),
-                style: TextStyle(color: Colors.white),
+              child: AnimatedContainer(
+                duration: 600.milliseconds,
+                child: detected
+                    ? Image.asset(
+                        "assets/images/camera_frame_active.webp",
+                        height: 380,
+                        width: 380,
+                      )
+                    : Image.asset(
+                        "assets/images/camera_frame_inactive.webp",
+                        height: 380,
+                        width: 380,
+                      ),
               ),
-              Text(
-                eye.toString(),
-                style: TextStyle(color: Colors.white),
+            ),
+            if (detected)
+              Center(
+                child: SizedBox(
+                    height: 304,
+                    width: 304,
+                    child: Image.asset(eyesClosed
+                        ? "assets/images/face_mark_eyes_close.webp"
+                        : "assets/images/face_mark_eyes_open.webp")),
               ),
-              Obx(() => Text(
-                    controller.blinks.toString(),
-                    style: TextStyle(color: Colors.white),
-                  )),
-              const Text("Delay"),
-              Text(predictionTime.toString())
-            ]),
-          ),
-          ElevatedButton(
-              onPressed: () {
-                runModelOnImage();
-              },
-              child: Text("PickImage"))
-        ]),
+            if (detected)
+              Text(
+                eyesClosed ? "EYES CLOSED" : "EYES OPEN",
+                style: const TextStyle(color: Colors.white),
+              ),
+            if (image != null) Image.memory(image),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text(
+                  predict.toString(),
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  eye.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                Obx(() => Text(
+                      controller.blinks.toString(),
+                      style: const TextStyle(color: Colors.white),
+                    )),
+                const Text("Delay"),
+                Text(predictionTime.toString())
+              ]),
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  cameraController.dispose();
+                  runModelOnImage();
+                },
+                child: Text("PickImage"))
+          ]),
+        ),
       ),
     );
   }
@@ -242,6 +245,21 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       predictionTime = currentTimeStamp - timeStamp;
 
       var element = predictions!.first;
+
+      // if (element != detectedBlinks.last) {
+      //   detected = true;
+      // }
+      if (element['index'] == 0) {
+        detected = false;                                                            
+        setState(() {});
+      } else if (element['index'] == 1) {
+        detected = true;
+        // detected = false;
+        addBlink(element);
+      } else {
+        detected = false;
+        setState(() {});
+      }
       print(element);
       {
         //   if (element['label'] == "2 Error") {
