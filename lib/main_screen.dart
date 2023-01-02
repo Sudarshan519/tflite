@@ -62,7 +62,7 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
-    const LivelinessDetection(),
+    // const LivelinessDetection(),
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: "FrontTutorial"),
@@ -74,10 +74,10 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const Tutorial(title: "TiltedTutorial"),
     const CaptureImage(type: "TiltedImage"),
     const Confirmation(type: "TiltedCapture"),
-    const Tutorial(title: "SelfieTutorial"),
+    // const Tutorial(title: "SelfieTutorial"),
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
-    const Tutorial(title: "Liveliness Tutorial"),
+    // const Tutorial(title: "Liveliness Tutorial"),
     const LivelinessDetection(),
     const DocumentConfirmation()
   ];
@@ -174,7 +174,11 @@ class _TutorialState extends State<Tutorial> {
                 child: Container(
                   color: Colors.black,
                   child: Image.asset(
-                    "assets/images/drive_license_front_shooting.gif",
+                    widget.title == "FrontTutorial"
+                        ? "assets/images/drive_license_front_shooting.gif"
+                        : widget.title == "BackTutorial"
+                            ? "assets/images/drive_license_back_shooting.gif"
+                            : "assets/images/phone_vertical.gif",
                     width: 400,
                     height: 250,
                   ),

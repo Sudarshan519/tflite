@@ -184,37 +184,37 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
                         ? "assets/images/face_mark_eyes_close.webp"
                         : "assets/images/face_mark_eyes_open.webp")),
               ),
-            if (detected)
-              Text(
-                eyesClosed ? "EYES CLOSED" : "EYES OPEN",
-                style: const TextStyle(color: Colors.white),
-              ),
-            if (image != null) Image.memory(image),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(
-                  predict.toString(),
-                  style: TextStyle(color: Colors.white),
-                ),
-                Text(
-                  eye.toString(),
-                  style: const TextStyle(color: Colors.white),
-                ),
-                Obx(() => Text(
-                      controller.blinks.toString(),
-                      style: const TextStyle(color: Colors.white),
-                    )),
-                const Text("Delay"),
-                Text(predictionTime.toString())
-              ]),
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  cameraController.dispose();
-                  runModelOnImage();
-                },
-                child: Text("PickImage"))
+            // if (detected)
+            //   Text(
+            //     eyesClosed ? "EYES CLOSED" : "EYES OPEN",
+            //     style: const TextStyle(color: Colors.white),
+            //   ),
+            // if (image != null) Image.memory(image),
+            // Align(
+            //   alignment: Alignment.bottomCenter,
+            //   child: Column(mainAxisSize: MainAxisSize.min, children: [
+            //     Text(
+            //       predict.toString(),
+            //       style: TextStyle(color: Colors.white),
+            //     ),
+            //     Text(
+            //       eye.toString(),
+            //       style: const TextStyle(color: Colors.white),
+            //     ),
+            //     Obx(() => Text(
+            //           controller.blinks.toString(),
+            //           style: const TextStyle(color: Colors.white),
+            //         )),
+            //     const Text("Delay"),
+            //     Text(predictionTime.toString())
+            //   ]),
+            // ),
+            // ElevatedButton(
+            //     onPressed: () {
+            //       cameraController.dispose();
+            //       runModelOnImage();
+            //     },
+            //     child: Text("PickImage"))
           ]),
         ),
       ),
