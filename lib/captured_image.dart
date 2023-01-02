@@ -44,15 +44,12 @@ import 'package:image/image.dart';
 // }
 
 const shift = (0xFF << 24);
-convertYUV420toImageColor(CameraImage image) async {
+convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
   try {
     final int width = image.width;
     final int height = image.height;
     final int uvRowStride = image.planes[1].bytesPerRow;
     final int? uvPixelStride = image.planes[1].bytesPerPixel;
-
-    print("uvRowStride: " + uvRowStride.toString());
-    print("uvPixelStride: " + uvPixelStride.toString());
 
     // imgLib -> Image package from https://pub.dartlang.org/packages/image
     var img = imglib.Image(width, height); // Create Image buffer
@@ -79,12 +76,23 @@ convertYUV420toImageColor(CameraImage image) async {
       }
     }
 
+    img = imglib.copyRotate(img, rotate ? -90 : 90);
+
+    ///trim rect
+    if (!rotate) {
+      // List<int> trimRect;
+      // var img1 = imglib.Image(400, 200);
+      // trimRect = findTrim(img1, mode: TrimMode.transparent, sides: Trim.all);
+      img = imglib.copyCrop(img, 20, 180, 420, 300);
+    }
+    // img = imglib.copyCrop(img, 20, 500, 500, 320);
     imglib.PngEncoder pngEncoder = new imglib.PngEncoder(level: 0, filter: 0);
+
     List<int> png = pngEncoder.encodeImage(img);
     // muteYUVProcessing = false;
     return (png);
   } catch (e) {
-    print(">>>>>>>>>>>> ERROR:" + e.toString());
+    // print(">>>>>>>>>>>> ERROR:" + e.toString());
   }
   // return null;
 }
