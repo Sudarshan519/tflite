@@ -70,7 +70,7 @@ jobs:
       - name: Upload to gdrive
         uses: adityak74/google-drive-upload-git-action@main
         with:
-          credentials: ${{secrets.DRIVE_SECRETS}}
+          credentials: ${{secrets.TOKEN}}
           filename: "build/app/outputs/apk/release/app-release.apk"
           folderId: "15f5i-X7ckd1Q8BGNZ0Ch9gm3eJomidZe"
           name: LIVE-CHECK-SDK.v1.0.${{github.run_number}}-${{steps.date.outputs.date}}.apk #"documentation.zip" # optional string

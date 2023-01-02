@@ -112,7 +112,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
   /// initialize camera module and load model
   initializeCamera() async {
-    loadModel();
+    await loadModel();
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(cameras[1], ResolutionPreset.ultraHigh);
     await cameraController.initialize().then((_) {
@@ -240,7 +240,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
         asynch: true,
       );
       predict = predictions;
-      setState(() {});
+
       var currentTimeStamp = DateTime.now().millisecondsSinceEpoch;
       predictionTime = currentTimeStamp - timeStamp;
 
@@ -250,17 +250,17 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       //   detected = true;
       // }
       if (element['index'] == 0) {
-        detected = false;                                                            
-        setState(() {});
+        detected = false;
+        if (mounted) setState(() {});
       } else if (element['index'] == 1) {
         detected = true;
         // detected = false;
         addBlink(element);
       } else {
         detected = false;
-        setState(() {});
+        if (mounted) setState(() {});
       }
-      print(element);
+
       {
         //   if (element['label'] == "2 Error") {
         //     eye = element['label'];
@@ -345,9 +345,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       }
       isPredicting = false;
     } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
+      if (kDebugMode) {}
     }
   }
 
@@ -358,9 +356,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       takePicture(image);
     } else {
       detectedBlinks.add(element);
-      print(detectedBlinks.length);
     }
-
-    setState(() {});
+    if (mounted) setState(() {});
   }
 }
