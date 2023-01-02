@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_face_verification/captured_image.dart';
+import 'package:flutter_face_verification/const/strings.dart';
+import 'package:flutter_face_verification/img_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:flutter_face_verification/controller.dart';
@@ -50,34 +51,48 @@ class _CaptureImageState extends State<CaptureImage> {
   bool timerInitialized = false;
   var value = 0;
   bool captured = false;
+
   getAvailableCamera() async {
     loadmodel();
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(
         widget.type == "SelfieCapture" ? cameras[1] : cameras[0],
         ResolutionPreset.medium);
-    cameraController.initialize().then((_) {
-      isInitialized = true;
-      if (modelReady) {
-        cameraController.startImageStream(runModelOnAvailableImage);
-      }
+    await cameraController.initialize();
+    isInitialized = true;
+    if (modelReady) {
+      cameraController.startImageStream(runModelOnAvailableImage);
+    }
 
-      setState(() {});
-    });
+    print(cameraController.value.aspectRatio.toString() + "ASPECT RATIO");
+    setState(() {});
   }
+
+  // resetCamera() {
+  //   timer = Timer.periodic(10.seconds, (timer) {
+  //     cameraController.dispose();
+  //     if (mounted) getAvailableCamera();
+  //   });
+  // }
 
   runModelOnAvailableImage(cameraImage) {
     image = cameraImage;
     if (isRunning) {
       return;
     } else {
-      if (modelReady) if (mounted) runmodelonImage(cameraImage);
+      if (modelReady) {
+        if (cameraImage != null) {
+          if (mounted) {
+            runmodelonImage(cameraImage);
+          }
+        }
+      }
     }
   }
 
   loadmodel() async {
     var path = widget.type == "FrontCapture"
-        ? 'assets/front/model_unquant.tflite'
+        ? TModels.FRONT_MODEL
         : widget.type == "BackCapture"
             ? 'assets/back/model_unquant.tflite'
             : widget.type == "TiltedImage"
@@ -123,9 +138,11 @@ class _CaptureImageState extends State<CaptureImage> {
           isRunning = false;
         });
       }
-      for (var element in predictions ?? []) {
+      var element = predictions!.first;
+      // for (var element in predictions ?? [])
+      {
         print(element);
-        if (element['confidence'] > .60) {
+        if (element['confidence'] > .50) {
           if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
             if (label == "0 Front") {
               if (!timerInitialized) {
@@ -198,7 +215,7 @@ class _CaptureImageState extends State<CaptureImage> {
     //   checkAngle(data);
     // }, onError: (err) {}, onDone: () {}));
     getAvailableCamera();
-
+    // resetCamera();
     setState(() {});
   }
 
@@ -327,10 +344,11 @@ class _CaptureImageState extends State<CaptureImage> {
   @override
   void dispose() {
     super.dispose();
+    // timer.cancel();
     cameraController.dispose();
-    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
+    // for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+    //   subscription.cancel();
+    // }
   }
 
   takePicture(cameraImage) async {
@@ -340,7 +358,6 @@ class _CaptureImageState extends State<CaptureImage> {
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String appDocPath = appDocDir.path;
       // cameraController.stopImageStream();
-      // print(appDocPath);
       var file = File(
           "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
       await file.writeAsBytes(image);
@@ -353,7 +370,10 @@ class _CaptureImageState extends State<CaptureImage> {
               : widget.type == "TiltedImage"
                   ? controller.tilted(file.path)
                   : controller.selfie(file.path);
+      timer.cancel();
       controller.nextPage();
+      // cameraController.stopImageStream();
+      // cameraController.dispose();
     }
 
     ///TODO:CAMERA TAKE PICTURE
@@ -390,112 +410,136 @@ class _CaptureImageState extends State<CaptureImage> {
       // DeviceOrientation.landscapeRight,
     ]);
     return Scaffold(
-      body: Stack(children: [
-        if (isInitialized)
-          Center(
-            child: SizedBox(child: CameraPreview(cameraController)),
-          ),
-        Center(
-          child: Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, .01)
-              ..rotateX(widget.type == "TiltedImage" ? -.18 : 0)
-              // ..rotateY(.03)
-              ..rotateZ(.0),
-            alignment: FractionalOffset.center,
-            child: Container(
-              height: 200,
-              width: 300,
-              decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: Border.all(
-                      width: (label != "" ||
-                              phone == 'portrait' ||
-                              phone == '45 degree')
-                          ? 3
-                          : 1.5,
-                      color: (phone == 'portrait' || phone == '45 degree')
-                          ? Colors.green
-                          : label != ""
-                              ? Colors.green
-                              : Colors.grey)),
-            ),
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            color: Colors.black,
+            alignment: Alignment.center,
+            child: Column(children: [
+              Stack(alignment: Alignment.center, children: [
+                if (isInitialized)
+                  // Center(
+                  //   child: AspectRatio(
+                  //     aspectRatio: 1 / .6,
+                  //     child: ClipRect(
+                  //       child: Transform.scale(
+                  //         scale: cameraController.value.aspectRatio / .6,
+                  //         child: Center(
+                  //           child: CameraPreview(cameraController),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  Center(
+                    child: CameraPreview(cameraController),
+                  ),
+                Center(
+                  child: Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, .01)
+                      ..rotateX(widget.type == "TiltedImage" ? -.18 : 0)
+                      // ..rotateY(.03)
+                      ..rotateZ(.0),
+                    alignment: FractionalOffset.center,
+                    child: Container(
+                      height: 200,
+                      width: 300,
+                      decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          border: Border.all(
+                              width: (label != "" ||
+                                      phone == 'portrait' ||
+                                      phone == '45 degree')
+                                  ? 3
+                                  : 1.5,
+                              color:
+                                  (phone == 'portrait' || phone == '45 degree')
+                                      ? Colors.green
+                                      : label != ""
+                                          ? Colors.green
+                                          : Colors.grey)),
+                    ),
+                  ),
+                ),
+                // Center(
+                //     child: Column(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: [
+                //     Text(phone,
+                //         style: Theme.of(context)
+                //             .textTheme
+                //             .titleMedium!
+                //             .copyWith(color: Colors.white, shadows: <Shadow>[
+                //           const Shadow(
+                //             offset: Offset(1.0, 1.0),
+                //             blurRadius: 3.0,
+                //             color: Color.fromARGB(255, 0, 0, 0),
+                //           ),
+                //           const Shadow(
+                //             offset: Offset(1.5, 1.5),
+                //             blurRadius: 3.0,
+                //             color: Color.fromARGB(255, 193, 16, 16),
+                //           ),
+                //         ])),
+                //     Text(
+                //       label,
+                //       style: Theme.of(context)
+                //           .textTheme
+                //           .titleMedium!
+                //           .copyWith(color: Colors.white, shadows: <Shadow>[
+                //         const Shadow(
+                //           offset: Offset(1.0, 1.0),
+                //           blurRadius: 3.0,
+                //           color: Color.fromARGB(255, 0, 0, 0),
+                //         ),
+                //         const Shadow(
+                //           offset: Offset(1.5, 1.5),
+                //           blurRadius: 3.0,
+                //           color: Color.fromARGB(255, 193, 16, 16),
+                //         ),
+                //       ]),
+                //     )
+                //   ],
+                // )),
+                // Align(
+                //     alignment: Alignment.bottomCenter,
+                //     child: InkWell(
+                //         onTap: () {
+                //           // startTimer();
+                //           // if (isDetected ||
+                //           //     phone == 'portrait' &&
+                //           //         (widget.type == "FrontCapture" ||
+                //           //             widget.type == "BackCapture")) {
+                //           //   takePicture(image);
+                //           // } else if (phone == "45 degree" &&
+                //           //     widget.type == "TiltedImage") {
+                //           //   takePicture(image);
+                //           // }
+                //         },
+                //         child: Container(
+                //           decoration: BoxDecoration(
+                //               color: Colors.white,
+                //               border: Border.all(
+                //                   width: label != "" ? 2 : 1.5,
+                //                   color: phone == 'portrait'
+                //                       ? Colors.green
+                //                       : label != ""
+                //                           ? Colors.green
+                //                           : Colors.grey)),
+                //           alignment: Alignment.center,
+                //           height: 50,
+                //           width: 150,
+                //           child: const Text(
+                //             "Capture",
+                //           ),
+                //         ))),
+                // Align(alignment: Alignment.bottomCenter, child: Text(value.toString())),
+              ]),
+            ]),
           ),
         ),
-        // Center(
-        //     child: Column(
-        //   mainAxisSize: MainAxisSize.min,
-        //   children: [
-        //     Text(phone,
-        //         style: Theme.of(context)
-        //             .textTheme
-        //             .titleMedium!
-        //             .copyWith(color: Colors.white, shadows: <Shadow>[
-        //           const Shadow(
-        //             offset: Offset(1.0, 1.0),
-        //             blurRadius: 3.0,
-        //             color: Color.fromARGB(255, 0, 0, 0),
-        //           ),
-        //           const Shadow(
-        //             offset: Offset(1.5, 1.5),
-        //             blurRadius: 3.0,
-        //             color: Color.fromARGB(255, 193, 16, 16),
-        //           ),
-        //         ])),
-        //     Text(
-        //       label,
-        //       style: Theme.of(context)
-        //           .textTheme
-        //           .titleMedium!
-        //           .copyWith(color: Colors.white, shadows: <Shadow>[
-        //         const Shadow(
-        //           offset: Offset(1.0, 1.0),
-        //           blurRadius: 3.0,
-        //           color: Color.fromARGB(255, 0, 0, 0),
-        //         ),
-        //         const Shadow(
-        //           offset: Offset(1.5, 1.5),
-        //           blurRadius: 3.0,
-        //           color: Color.fromARGB(255, 193, 16, 16),
-        //         ),
-        //       ]),
-        //     )
-        //   ],
-        // )),
-        // Align(
-        //     alignment: Alignment.bottomCenter,
-        //     child: InkWell(
-        //         onTap: () {
-        //           // startTimer();
-        //           // if (isDetected ||
-        //           //     phone == 'portrait' &&
-        //           //         (widget.type == "FrontCapture" ||
-        //           //             widget.type == "BackCapture")) {
-        //           //   takePicture(image);
-        //           // } else if (phone == "45 degree" &&
-        //           //     widget.type == "TiltedImage") {
-        //           //   takePicture(image);
-        //           // }
-        //         },
-        //         child: Container(
-        //           decoration: BoxDecoration(
-        //               color: Colors.white,
-        //               border: Border.all(
-        //                   width: label != "" ? 2 : 1.5,
-        //                   color: phone == 'portrait'
-        //                       ? Colors.green
-        //                       : label != ""
-        //                           ? Colors.green
-        //                           : Colors.grey)),
-        //           alignment: Alignment.center,
-        //           height: 50,
-        //           width: 150,
-        //           child: const Text(
-        //             "Capture",
-        //           ),
-        //         ))),
-        // Align(alignment: Alignment.bottomCenter, child: Text(value.toString())),
-      ]),
+      ),
     );
   }
 }

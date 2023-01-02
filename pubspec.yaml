@@ -67,6 +67,8 @@ flutter:
     - assets/eye3/
     - assets/back_rc/
     - assets/face/
+    - assets/face_final/
+    - assets/front_new/
     # - assets/tilted/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

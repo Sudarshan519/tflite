@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imglib;
-import 'package:image/image.dart';
 
 // imglib.Image convertYUV420ToImage(CameraImage cameraImage) {
 //   final width = cameraImage.width;
@@ -83,10 +82,38 @@ convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
       // List<int> trimRect;
       // var img1 = imglib.Image(400, 200);
       // trimRect = findTrim(img1, mode: TrimMode.transparent, sides: Trim.all);
-      img = imglib.copyCrop(img, 20, 180, 420, 300);
+
+      ///480 /680
+      // var cropSizeX = 420;
+      // var cropSizeY = 300;
+
+      // var minSize = min(img.width, img.height);
+      // var ratio = img.height / img.width;
+
+      // // img.width - min(img.width, img.height) ~/ 3;
+
+      //  LAST APK
+      // var decodedImage = img;
+      // var cropSize = min(decodedImage.width, decodedImage.height);
+      // int offsetX =
+      //     (decodedImage.width - min(decodedImage.width, decodedImage.height)) ~/
+      //         20;
+      // int offsetY = (decodedImage.height -
+      //         min(decodedImage.width, decodedImage.height)) ~/
+      //     1;
+      // img = imglib.copyCrop(img, offsetX, offsetY, 420, 300);
+      //  LAST APK
+      // var offSetX =
+      // (20 * img.width ~/ 420); //(image.width - minSize) ~/ 2; // 20;
+      // var offSetY = 120 * image.height ~/ 300; //(img.height - minSize) ~/ 2;
+      // img = imglib.copyCrop(img, offsetX, offsetY, 420, 300);
+      // img = imglib.copyCrop(img, offSetX, offSetY, 500, 320);
+      // img = imglib.copyCrop(img, offSetX, offSetY, cropSizeX, cropSizeY);
+
+      img = imglib.copyCrop(img, 40, 180, 420, 300);
     }
-    // img = imglib.copyCrop(img, 20, 500, 500, 320);
-    imglib.PngEncoder pngEncoder = new imglib.PngEncoder(level: 0, filter: 0);
+
+    imglib.PngEncoder pngEncoder = imglib.PngEncoder(level: 0, filter: 0);
 
     List<int> png = pngEncoder.encodeImage(img);
     // muteYUVProcessing = false;

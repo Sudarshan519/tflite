@@ -48,7 +48,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   var eye;
   final MainController controller = Get.put(MainController());
 
-  int blinkTimeStamp = 0; // Get.find();
+  int blinkTimeStamp = 0;
   var predict;
   @override
   void initState() {
@@ -115,24 +115,23 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     await loadModel();
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(cameras[1], ResolutionPreset.ultraHigh);
-    await cameraController.initialize().then((_) {
-      cameraInitialized = true;
+    await cameraController.initialize();
+    cameraInitialized = true;
 
-      setState(() {});
-      cameraController.startImageStream((image) {
-        if (!captured) {
-          if (isPredicting) {
-            return;
-          } else {
-            if (mounted) runModel(image);
-          }
+    setState(() {});
+    await cameraController.startImageStream((image) {
+      if (!captured) {
+        if (isPredicting) {
+          return;
         } else {
-          cameraController.stopImageStream();
-          cameraController.dispose();
-          cameraInitialized = false;
-          if (mounted) setState(() {});
+          if (mounted) runModel(image);
         }
-      });
+      } else {
+        cameraController.stopImageStream();
+        cameraController.dispose();
+        cameraInitialized = false;
+        if (mounted) setState(() {});
+      }
     });
   }
 

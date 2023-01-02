@@ -12,7 +12,7 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
 import 'dart:ui' as ui;
-import 'captured_image.dart';
+import 'img_utils.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter_face_verification/const/strings.dart';
 import 'package:flutter_face_verification/screens/face_detection_screen.dart';
 import 'package:flutter_face_verification/screens/liveliness_detection_screen.dart';
 import 'package:get/get.dart';
@@ -16,7 +17,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Main Screen")),
+      appBar: AppBar(title: const Text(AppStrings.DOCUMENT_VERIFICATION)),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -62,6 +63,8 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
+    // const FaceDetection(),
+    // const CaptureImage(type: "BackCapture"),
     // const LivelinessDetection(),
     const IntroScreen(),
     const IntroSecond(),
@@ -74,10 +77,8 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
     const Tutorial(title: "TiltedTutorial"),
     const CaptureImage(type: "TiltedImage"),
     const Confirmation(type: "TiltedCapture"),
-    // const Tutorial(title: "SelfieTutorial"),
     const FaceDetection(),
     const Confirmation(type: "SelfieCapture"),
-    // const Tutorial(title: "Liveliness Tutorial"),
     const LivelinessDetection(),
     const DocumentConfirmation()
   ];
@@ -269,10 +270,10 @@ class _ConfirmationState extends State<Confirmation> {
                             : controller.selfie.value,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text(base64.substring(0, 200)),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(20.0),
+            //   child: Text(base64.substring(0, 200)),
+            // ),
             if (widget.type == "SelfieCapture")
               Image.asset("assets/images/fail_pattern.webp"),
             Text(

@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_face_verification/captured_image.dart';
+import 'package:flutter_face_verification/img_utils.dart';
+import 'package:flutter_face_verification/const/strings.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -39,11 +40,31 @@ class _FaceDetectionState extends State<FaceDetection> {
     initializeCamera();
   }
 
+  initializeCamera() async {
+    await loadModel();
+    List<CameraDescription> cameras = await availableCameras();
+    cameraController = CameraController(cameras[1], ResolutionPreset.medium);
+    await cameraController.initialize().then((_) {});
+    cameraInitialized = true;
+    setState(() {});
+    cameraController.startImageStream((image) {
+      if (!captured) {
+        runModel(image);
+      } else {
+        // cameraController.stopImageStream();
+        // cameraController.dispose();
+        cameraInitialized = false;
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
   loadModel() async {
     await Tflite.loadModel(
-        model:
-            // "assets/face/model_unquant.tflite",
-            'assets/model_face.tflite',
+        model: TModels.SELFIE_MODEL
+        // "assets/face/model_unquant.tflite",
+        // 'assets/model_face.tflite'
+        ,
         labels: 'assets/labels_face.txt');
 
     modelReady = true;
@@ -64,34 +85,11 @@ class _FaceDetectionState extends State<FaceDetection> {
     path = file.path;
     controller.selfie(path);
 
-    cameraController.dispose();
     Future.delayed(Duration.zero, () {
       loading = false;
       if (mounted) setState(() {});
     });
     if (!nextPage) controller.nextPage();
-  }
-
-  initializeCamera() async {
-    // setState(() {});
-    loadModel();
-    List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.low);
-    await cameraController.initialize().then((_) {
-      cameraInitialized = true;
-
-      setState(() {});
-      cameraController.startImageStream((image) {
-        if (!captured) {
-          runModel(image);
-        } else {
-          cameraController.stopImageStream();
-          cameraController.dispose();
-          cameraInitialized = false;
-          if (mounted) setState(() {});
-        }
-      });
-    });
   }
 
   void runModel(CameraImage image) async {
@@ -114,7 +112,9 @@ class _FaceDetectionState extends State<FaceDetection> {
       asynch: true,
     );
     isPredicting = false;
-    for (var element in predictions!) {
+    var element = predictions!.first;
+    // for (var element in predictions!)
+    {
       if (element['confidence'] > .80 &&
           element['label'] == "0 Face Detected") {
         faceDetected = true;
@@ -149,6 +149,13 @@ class _FaceDetectionState extends State<FaceDetection> {
         if (mounted) setState(() {});
       }
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    cameraController.dispose();
   }
 
   @override

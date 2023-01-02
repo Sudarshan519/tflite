@@ -30,13 +30,14 @@ class MainController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    pageController = new PageController();
+    pageController = PageController();
   }
 
   @override
   void onClose() {
-    super.onClose();
     pageController.dispose();
+    pageController = null;
+    super.onClose();
   }
 
   nextPage() {

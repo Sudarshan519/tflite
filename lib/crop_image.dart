@@ -1,5 +1,1 @@
-class ImageCropper{
-  cropImage(){
-    
-  }
-}
+
