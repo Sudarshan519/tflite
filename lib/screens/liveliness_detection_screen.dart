@@ -30,7 +30,6 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   bool timerInitialized = false;
   var path = "";
   var loading = false;
-  var blinkDetected = false;
   bool nextPage = false;
 
   var predictionTime = 0;
@@ -41,7 +40,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   var detected = false;
   var eyesClosed = false;
   var blinks = 0;
-
+  var eyesOpen = false;
   final List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
   int x = 0, y = 0, z = 0;
@@ -54,17 +53,17 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   void initState() {
     super.initState();
     initializeCamera();
-    _streamSubscriptions.add(accelerometerEvents.listen((data) {
-      checkAngle(data);
-    }, onError: (err) {}, onDone: () {}));
+    _streamSubscriptions.add(accelerometerEvents.listen(
+      (data) {
+        checkAngle(data);
+      },
+    ));
   }
 
   void checkAngle(AccelerometerEvent data) {
     if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
-      // print("STABLE");
-      // print("STABLE ${detectedBlinks.length}");
       if (detectedBlinks.isNotEmpty) {
-        if (cameraImage != null) takePicture(cameraImage);
+        // if (cameraImage != null) takePicture(cameraImage);
       }
     } else {
       x = data.x.round();
@@ -79,10 +78,10 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     eye = "";
     Future.delayed(2.seconds, () {
       eyesClosed = false;
-      blinkDetected = false;
+      detected = false;
       if (mounted) setState(() {});
     });
-    blinkDetected = false;
+    detected = false;
     detectedBlinks.clear();
     setState(() {});
   }
@@ -135,11 +134,11 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     });
   }
 
-  runModelOnImage() async {
-    var image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    var predictions = await Tflite.runModelOnImage(path: image!.path);
-    print(predictions!.first);
-  }
+  // runModelOnImage() async {
+  //   var image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  //   var predictions = await Tflite.runModelOnImage(path: image!.path);
+  //   print(predictions!.first);
+  // }
 
   @override
   void dispose() {
@@ -244,17 +243,20 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       predictionTime = currentTimeStamp - timeStamp;
 
       var element = predictions!.first;
+      print(element);
 
       // if (element != detectedBlinks.last) {
       //   detected = true;
       // }
       if (element['index'] == 0) {
-        detected = false;
+        detected = true;
+        eyesOpen = true;
         if (mounted) setState(() {});
       } else if (element['index'] == 1) {
-        detected = true;
-        // detected = false;
-        addBlink(element);
+        if (eyesOpen) {
+          detected = true;
+          addBlink(element);
+        }
       } else {
         detected = false;
         if (mounted) setState(() {});

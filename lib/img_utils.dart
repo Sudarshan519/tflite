@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:image/image.dart' as imglib;
 
@@ -75,10 +77,13 @@ convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
       }
     }
 
-    img = imglib.copyRotate(img, rotate ? -90 : 90);
+    if (Platform.isAndroid) img = imglib.copyRotate(img, rotate ? -90 : 90);
 
     ///trim rect
     if (!rotate) {
+      /// TODO: DYNAMIC CROP ON IMAGE ACC/ TO DEVICE CAMERA
+      ///
+      ///
       // List<int> trimRect;
       // var img1 = imglib.Image(400, 200);
       // trimRect = findTrim(img1, mode: TrimMode.transparent, sides: Trim.all);

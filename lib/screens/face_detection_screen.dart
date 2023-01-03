@@ -51,8 +51,6 @@ class _FaceDetectionState extends State<FaceDetection> {
       if (!captured) {
         runModel(image);
       } else {
-        // cameraController.stopImageStream();
-        // cameraController.dispose();
         cameraInitialized = false;
         if (mounted) setState(() {});
       }

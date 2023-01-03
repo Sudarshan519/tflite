@@ -1,11 +1,22 @@
 class AppStrings {
   static const FRONT = "FRONT";
-  static const BACK = "FRONT";
-  static const TILTED = "FRONT";
+  static const BACK = "BACK";
+  static const TILTED = "TILTED";
   static const SELFIE = "SELFIE";
   static const LIVENESS = "LIVENESS";
 
   static const String DOCUMENT_VERIFICATION = "DOCUMENT VERIFICATION SDK";
+
+  static const String BEGIN_PROCESS = "Begin Process";
+
+  static const String RETAKE = "Retake";
+  static const String NEXT = "Next";
+}
+
+class AppImages {
+  static const DOCUMENT_FAIL = "";
+  static const DIAGONAL_FAIL = "";
+  static const SELFIE_FAIL = "";
 }
 
 class TModels {

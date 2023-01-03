@@ -35,10 +35,6 @@ class _CaptureImageState extends State<CaptureImage> {
   int timeStamp = 0;
   int maxDelay = 0;
 
-  ///acceleremeter center value
-  var acc_center_x = 0;
-  var acc_center_y = 0;
-  var acc_center_z = 0;
   var label = "";
   var phone = "";
   bool isCapturing = false;
@@ -64,7 +60,7 @@ class _CaptureImageState extends State<CaptureImage> {
       cameraController.startImageStream(runModelOnAvailableImage);
     }
 
-    print(cameraController.value.aspectRatio.toString() + "ASPECT RATIO");
+    // print(cameraController.value.aspectRatio.toString() + "ASPECT RATIO");
     setState(() {});
   }
 
@@ -91,21 +87,21 @@ class _CaptureImageState extends State<CaptureImage> {
   }
 
   loadmodel() async {
-    var path = widget.type == "FrontCapture"
+    var path = widget.type == AppStrings.FRONT
         ? TModels.FRONT_MODEL
-        : widget.type == "BackCapture"
+        : widget.type == AppStrings.BACK
             ? 'assets/back/model_unquant.tflite'
-            : widget.type == "TiltedImage"
+            : widget.type == AppStrings.TILTED
                 ? 'assets/tilted/model_unquant.tflite'
                 : 'assets/model_unquant.tflite';
-    var labels = widget.type == "FrontCapture"
+    var labels = widget.type == AppStrings.FRONT
         ? 'assets/front/labels.txt'
-        : widget.type == "BackCapture"
+        : widget.type == AppStrings.BACK
             ? 'assets/back/labels.txt'
-            : widget.type == "TiltedImage"
+            : widget.type == AppStrings.TILTED
                 ? 'assets/tilted/labels.txt'
                 : 'assets/labels.txt';
-    print(path + label);
+    // print(path + label);
     await Tflite.loadModel(model: path, labels: labels);
 
     modelReady = true;
@@ -140,89 +136,87 @@ class _CaptureImageState extends State<CaptureImage> {
       }
       var element = predictions!.first;
       // for (var element in predictions ?? [])
-      {
-        print(element);
-        if (element['confidence'] > .50) {
-          if (widget.type == "FrontCapture" && element['label'] == "0 Front") {
-            if (label == "0 Front") {
-              if (!timerInitialized) {
-                startTimer();
-              }
-            }
-            if (label != element['label']) {
-              isDetected = true;
-              if (mounted) {
-                setState(() {
-                  label = element['label'];
-                });
-              }
-            }
-          } else if (widget.type == "BackCapture" &&
-              element['label'] == "0 Back") {
-            if (label == "0 Back") {
-              if (!timerInitialized) {
-                startTimer();
-              }
-            }
-            if (label != element['label']) {
-              isDetected = true;
-              if (mounted) {
-                setState(() {
-                  label = element['label'];
-                });
-              }
-            }
-          } else if (widget.type == "TiltedImage" &&
-              element['label'] == "1 Tilted") {
-            if (label == "1 Tilted") {
-              if (!timerInitialized) {
-                startTimer();
-              }
-            }
-            if (label != element['label']) {
-              isDetected = true;
-              if (mounted) {
-                setState(() {
-                  label = element['label'];
-                });
-              }
-            }
-          } else {
-            label = "";
-            if (label != "") {
-              isDetected = false;
-              if (mounted) {
-                setState(() {
-                  label = "";
-                });
-              }
+
+      if (element['confidence'] > .50) {
+        if (widget.type == AppStrings.FRONT && element['label'] == "0 Front") {
+          if (label == "0 Front") {
+            if (!timerInitialized) {
+              startTimer();
             }
           }
+          if (label != element['label']) {
+            isDetected = true;
+            if (mounted) {
+              setState(() {
+                label = element['label'];
+              });
+            }
+          }
+        } else if (widget.type == AppStrings.BACK &&
+            element['label'] == "0 Back") {
+          if (label == "0 Back") {
+            if (!timerInitialized) {
+              startTimer();
+            }
+          }
+          if (label != element['label']) {
+            isDetected = true;
+            if (mounted) {
+              setState(() {
+                label = element['label'];
+              });
+            }
+          }
+        } else if (widget.type == AppStrings.TILTED &&
+            element['label'] == "1 Tilted") {
+          if (label == "1 Tilted") {
+            if (!timerInitialized) {
+              startTimer();
+            }
+          }
+          if (label != element['label']) {
+            isDetected = true;
+            if (mounted) {
+              setState(() {
+                label = element['label'];
+              });
+            }
+          }
+        } else {
+          clearDetection();
         }
       }
     } catch (e) {}
-    // mainController.predictions(prediction);
+  }
+
+  clearDetection() {
+    label = "";
+    if (label != "") {
+      if (timerInitialized) {
+        timerInitialized = false;
+        timer.cancel();
+      }
+      isDetected = false;
+      if (mounted) {
+        setState(() {
+          label = "";
+        });
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    // _streamSubscriptions.add(accelerometerEvents.listen((data) {
-    //   // print(data);
-    //   x = data.x.floor();
-    //   y = data.y.floor();
-    //   z = data.z.round();
-    //   checkAngle(data);
-    // }, onError: (err) {}, onDone: () {}));
+    _streamSubscriptions.add(accelerometerEvents.listen((data) {
+      checkAngle(data);
+    }));
     getAvailableCamera();
-    // resetCamera();
-    setState(() {});
   }
 
   startTimer() {
-    print("starting timer");
     if (!timerInitialized) {
-      timer = Timer.periodic(1.seconds, (t) {
+      timer = Timer.periodic(2.seconds, (t) {
         if (value > 2) {
           takePicture(image);
           timer.cancel();
@@ -244,69 +238,80 @@ class _CaptureImageState extends State<CaptureImage> {
   }
 
   checkAngle(AccelerometerEvent data) {
-    // print("""$x $y $z""");
-
-    /// portrait case
-    if (x == 0 && y == 9 && z == 0) {
-      if (phone != "portrait") {
-        // if (!timerInitialized) {
-        //   startTimer();
-        // }
-        setState(() {
-          phone = "portrait";
-        });
-      }
-      print("portrait");
-      if (isCapturing) return;
-    } else if (x == 0 && y == 0 && (z) > 9) {
-      // if (!timerInitialized) {
-      //   startTimer();
-      // }
-      // print("protraint 1");
-      if (phone != "portrait") {
-        phone = "portrait";
-        setState(() {});
-      }
-      // print("portrait");
-      if (isCapturing) return;
-    } else if (x == 0 && y == 7 && z == 0) {
-      if (widget.type == "TiltedImage") {
-        if (!timerInitialized) {
-          startTimer();
-        }
-      }
-      if (phone != "45 degree") {
-        isCapturing = true;
-        setState(() {
-          phone = "45 degree";
-        });
-      }
-
-      if (isCapturing) return;
-    } else if (x == 0 && y == 7 && z == 7) {
-      if (widget.type == "TiltedImage") {
-        if (!timerInitialized) {
-          startTimer();
-        }
-      }
-      // print("45 degree 1");
-      if (phone != "45 degree") {
-        isCapturing = true;
-        setState(() {
-          phone = "45 degree";
-        });
-      }
+    if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
+      if (timerInitialized) {}
     } else {
-      // resetTimer();
-      // if (label != "Failed detection") {
-      setState(() {
-        phone = "";
-      });
-      // }
-      // print("Failed detection");
+      x = data.x.round();
+      y = data.y.round();
+      z = data.z.round();
+      clearDetection();
     }
 
-    //      // Using x y and z from accelerometer, calculate x and y angles
+    /// CHECK FOR PHONE DIRECTION
+    ///
+    ///
+    // if (x == 0 && y == 9 && z == 0) {
+    //   if (phone != "portrait") {
+    //     // if (!timerInitialized) {
+    //     //   startTimer();
+    //     // }
+    //     setState(() {
+    //       phone = "portrait";
+    //     });
+    //   }
+    //   print("portrait");
+    //   if (isCapturing) return;
+    // } else if (x == 0 && y == 0 && (z) > 9) {
+    //   // if (!timerInitialized) {
+    //   //   startTimer();
+    //   // }
+    //   // print("protraint 1");
+    //   if (phone != "portrait") {
+    //     phone = "portrait";
+    //     setState(() {});
+    //   }
+    //   // print("portrait");
+    //   if (isCapturing) return;
+    // } else if (x == 0 && y == 7 && z == 0) {
+    //   if (widget.type == "TiltedImage") {
+    //     if (!timerInitialized) {
+    //       startTimer();
+    //     }
+    //   }
+    //   if (phone != "45 degree") {
+    //     isCapturing = true;
+    //     setState(() {
+    //       phone = "45 degree";
+    //     });
+    //   }
+
+    //   if (isCapturing) return;
+    // } else if (x == 0 && y == 7 && z == 7) {
+    //   if (widget.type == "TiltedImage") {
+    //     if (!timerInitialized) {
+    //       startTimer();
+    //     }
+    //   }
+    //   // print("45 degree 1");
+    //   if (phone != "45 degree") {
+    //     isCapturing = true;
+    //     setState(() {
+    //       phone = "45 degree";
+    //     });
+    //   }
+    // } else {
+    //   // resetTimer();
+    //   // if (label != "Failed detection") {
+    //   setState(() {
+    //     phone = "";
+    //   });
+    //   // }
+    //   // print("Failed detection");
+
+    // }
+
+    /// CHECK FOR PHONE ANGLE
+    /// Using x y and z from accelerometer, calculate x and y angles
     // double x_val, y_val, z_val, result;
     // double x2, y2, z2; //24 bitshort long
 
@@ -344,39 +349,34 @@ class _CaptureImageState extends State<CaptureImage> {
   @override
   void dispose() {
     super.dispose();
-    // timer.cancel();
     cameraController.dispose();
-    // for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
-    //   subscription.cancel();
-    // }
+    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
+      subscription.cancel();
+    }
   }
 
+  /// TAKE PICTURE ON IMAGESTREAM
   takePicture(cameraImage) async {
     if (!captured) {
-      // cameraController.dispose();
       var image = await convertYUV420toImageColor(cameraImage);
       Directory appDocDir = await getApplicationDocumentsDirectory();
       String appDocPath = appDocDir.path;
-      // cameraController.stopImageStream();
       var file = File(
           "${appDocPath + DateTime.now().millisecondsSinceEpoch.toString()}.png");
       await file.writeAsBytes(image);
 
-      // var newImage = await cropImage(file.path);
-      widget.type == "FrontCapture"
+      widget.type == AppStrings.FRONT
           ? controller.frontImage(file.path)
-          : widget.type == "BackCapture"
+          : widget.type == AppStrings.BACK
               ? controller.backImage(file.path)
-              : widget.type == "TiltedImage"
+              : widget.type == AppStrings.TILTED
                   ? controller.tilted(file.path)
                   : controller.selfie(file.path);
       timer.cancel();
       controller.nextPage();
-      // cameraController.stopImageStream();
-      // cameraController.dispose();
     }
 
-    ///TODO:CAMERA TAKE PICTURE
+    ///TODO:CAMERA TAKE PICTURE USING CAMERA INBUILT FUNCTION
     ///
     /// camera controller when stream disabled
     // await cameraController.takePicture().then((image) {
@@ -411,133 +411,73 @@ class _CaptureImageState extends State<CaptureImage> {
     ]);
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Container(
-            color: Colors.black,
-            alignment: Alignment.center,
-            child: Column(children: [
-              Stack(alignment: Alignment.center, children: [
-                if (isInitialized)
-                  // Center(
-                  //   child: AspectRatio(
-                  //     aspectRatio: 1 / .6,
-                  //     child: ClipRect(
-                  //       child: Transform.scale(
-                  //         scale: cameraController.value.aspectRatio / .6,
-                  //         child: Center(
-                  //           child: CameraPreview(cameraController),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  Center(
-                    child: CameraPreview(cameraController),
-                  ),
-                Center(
-                  child: Transform(
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, .01)
-                      ..rotateX(widget.type == "TiltedImage" ? -.18 : 0)
-                      // ..rotateY(.03)
-                      ..rotateZ(.0),
-                    alignment: FractionalOffset.center,
-                    child: Container(
-                      height: 200,
-                      width: 300,
-                      decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          border: Border.all(
-                              width: (label != "" ||
-                                      phone == 'portrait' ||
-                                      phone == '45 degree')
-                                  ? 3
-                                  : 1.5,
-                              color:
-                                  (phone == 'portrait' || phone == '45 degree')
-                                      ? Colors.green
-                                      : label != ""
-                                          ? Colors.green
-                                          : Colors.grey)),
-                    ),
-                  ),
-                ),
-                // Center(
-                //     child: Column(
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     Text(phone,
-                //         style: Theme.of(context)
-                //             .textTheme
-                //             .titleMedium!
-                //             .copyWith(color: Colors.white, shadows: <Shadow>[
-                //           const Shadow(
-                //             offset: Offset(1.0, 1.0),
-                //             blurRadius: 3.0,
-                //             color: Color.fromARGB(255, 0, 0, 0),
-                //           ),
-                //           const Shadow(
-                //             offset: Offset(1.5, 1.5),
-                //             blurRadius: 3.0,
-                //             color: Color.fromARGB(255, 193, 16, 16),
-                //           ),
-                //         ])),
-                //     Text(
-                //       label,
-                //       style: Theme.of(context)
-                //           .textTheme
-                //           .titleMedium!
-                //           .copyWith(color: Colors.white, shadows: <Shadow>[
-                //         const Shadow(
-                //           offset: Offset(1.0, 1.0),
-                //           blurRadius: 3.0,
-                //           color: Color.fromARGB(255, 0, 0, 0),
-                //         ),
-                //         const Shadow(
-                //           offset: Offset(1.5, 1.5),
-                //           blurRadius: 3.0,
-                //           color: Color.fromARGB(255, 193, 16, 16),
-                //         ),
-                //       ]),
-                //     )
-                //   ],
-                // )),
-                // Align(
-                //     alignment: Alignment.bottomCenter,
-                //     child: InkWell(
-                //         onTap: () {
-                //           // startTimer();
-                //           // if (isDetected ||
-                //           //     phone == 'portrait' &&
-                //           //         (widget.type == "FrontCapture" ||
-                //           //             widget.type == "BackCapture")) {
-                //           //   takePicture(image);
-                //           // } else if (phone == "45 degree" &&
-                //           //     widget.type == "TiltedImage") {
-                //           //   takePicture(image);
-                //           // }
-                //         },
-                //         child: Container(
-                //           decoration: BoxDecoration(
-                //               color: Colors.white,
-                //               border: Border.all(
-                //                   width: label != "" ? 2 : 1.5,
-                //                   color: phone == 'portrait'
-                //                       ? Colors.green
-                //                       : label != ""
-                //                           ? Colors.green
-                //                           : Colors.grey)),
-                //           alignment: Alignment.center,
-                //           height: 50,
-                //           width: 150,
-                //           child: const Text(
-                //             "Capture",
-                //           ),
-                //         ))),
-                // Align(alignment: Alignment.bottomCenter, child: Text(value.toString())),
-              ]),
-            ]),
-          ),
+        child: Container(
+          color: Colors.black,
+          child: Stack(alignment: Alignment.center, children: [
+            if (isInitialized)
+              // Center(
+              //   child: AspectRatio(
+              //     aspectRatio: 1 / .6,
+              //     child: ClipRect(
+              //       child: Transform.scale(
+              //         scale: cameraController.value.aspectRatio / .6,
+              //         child: Center(
+              //           child: CameraPreview(cameraController),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              ...[
+              Center(
+                child: CameraPreview(cameraController),
+              ),
+              BoundingBox(widget: widget, label: label, phone: phone),
+            ]
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Individual Bounding Box
+class BoundingBox extends StatelessWidget {
+  const BoundingBox({
+    Key? key,
+    required this.widget,
+    required this.label,
+    required this.phone,
+  }) : super(key: key);
+
+  final CaptureImage widget;
+  final String label;
+  final String phone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Transform(
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, .01)
+          ..rotateX(widget.type == AppStrings.TILTED ? -.18 : 0),
+        alignment: FractionalOffset.center,
+        child: Container(
+          height: 200,
+          width: 300,
+          decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border.all(
+                  width: (label != "" ||
+                          phone == 'portrait' ||
+                          phone == '45 degree')
+                      ? 3
+                      : 1.5,
+                  color: (phone == 'portrait' || phone == '45 degree')
+                      ? Colors.green
+                      : label != ""
+                          ? Colors.green
+                          : Colors.grey)),
         ),
       ),
     );
