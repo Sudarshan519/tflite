@@ -73,6 +73,6 @@ jobs:
           credentials: ${{secrets.TOKEN}}
           filename: "build/app/outputs/apk/release/app-release.apk"
           folderId: "15f5i-X7ckd1Q8BGNZ0Ch9gm3eJomidZe"
-          name: TICTACTOE.v1.0.${{github.run_number}}-${{steps.date.outputs.date}}.apk #"documentation.zip" # optional string
+          name: LIVE-CHECK-SDK.v1.0.${{github.run_number}}-${{steps.date.outputs.date}}.apk #"documentation.zip" # optional string
           overwrite: "true" # optional boolean
           mimeType: "application/vnd.android.package-archive"

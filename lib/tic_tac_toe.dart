@@ -95,7 +95,7 @@ class _TicTacToeState extends State<TicTacToe> {
                   onPressed: () {
                     clear();
                   },
-                  icon: Icon(Icons.clear))
+                  icon: const Icon(Icons.clear))
             ],
           ),
           Expanded(
