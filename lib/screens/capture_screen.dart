@@ -12,7 +12,7 @@ import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
 import 'package:tflite/tflite.dart';
 
-class CaptureImage extends StatefulWidget {
+class CaptureImage extends StatefulWidget with WidgetsBindingObserver {
   const CaptureImage({Key? key, required this.type}) : super(key: key);
   final String type;
   @override
@@ -53,7 +53,8 @@ class _CaptureImageState extends State<CaptureImage> {
     List<CameraDescription> cameras = await availableCameras();
     cameraController = CameraController(
         widget.type == "SelfieCapture" ? cameras[1] : cameras[0],
-        ResolutionPreset.medium);
+        ResolutionPreset.medium,
+        enableAudio: false);
     await cameraController.initialize();
     isInitialized = true;
     if (modelReady) {
@@ -438,6 +439,21 @@ class _CaptureImageState extends State<CaptureImage> {
         ),
       ),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.paused:
+        cameraController.stopImageStream();
+        break;
+      case AppLifecycleState.resumed:
+        if (!cameraController.value.isStreamingImages) {
+          await cameraController.startImageStream(runModelOnAvailableImage);
+        }
+        break;
+      default:
+    }
   }
 }
 

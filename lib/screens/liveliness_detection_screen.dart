@@ -76,7 +76,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   /// clear blinks
   clearBlinks() {
     eye = "";
-    Future.delayed(2.seconds, () {
+    Future.delayed(1.seconds, () {
       eyesClosed = false;
       detected = false;
       if (mounted) setState(() {});
@@ -113,7 +113,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   initializeCamera() async {
     await loadModel();
     List<CameraDescription> cameras = await availableCameras();
-    cameraController = CameraController(cameras[1], ResolutionPreset.ultraHigh);
+    cameraController = CameraController(cameras[1], ResolutionPreset.medium);
     await cameraController.initialize();
     cameraInitialized = true;
 
@@ -157,6 +157,11 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
           child: Stack(children: [
             if (cameraInitialized)
               Center(child: CameraPreview(cameraController)),
+            Text(
+              "KEEP YOUR HAND STEADY WHILE BLINKING TWICE",
+              style: TextStyle(
+                  shadows: [Shadow(color: Colors.green, offset: Offset(1, 1))]),
+            ),
             Center(
               child: AnimatedContainer(
                 duration: 600.milliseconds,
@@ -353,7 +358,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   void addBlink(element) {
     controller.blinks = controller.blinks + 1;
     detectedBlinks.add(element);
-    if (detectedBlinks.length > 1) {
+    if (detectedBlinks.length > 2) {
       takePicture(image);
     } else {
       detectedBlinks.add(element);

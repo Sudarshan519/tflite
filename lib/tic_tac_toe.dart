@@ -2,6 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+void main(List<String> args) {
+  runApp(MaterialApp(
+    home: TicTacToe(),
+  ));
+}
+
 class TicTacToe extends StatefulWidget {
   const TicTacToe({Key? key}) : super(key: key);
 
@@ -99,28 +105,31 @@ class _TicTacToeState extends State<TicTacToe> {
             ],
           ),
           Expanded(
-            child: GridView.builder(
-                itemCount: 9,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-                itemBuilder: (_, i) => InkWell(
-                      onTap: () {
-                        if ((playerTurn || !playWithAI) && !playerWins) {
-                          changePlayerTurn(i);
-                        }
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey)),
-                        height: 80,
-                        width: 80,
-                        child: Text(
-                          values[i],
-                          style: Theme.of(context).textTheme.headline4,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: GridView.builder(
+                  itemCount: 9,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3),
+                  itemBuilder: (_, i) => InkWell(
+                        onTap: () {
+                          if ((playerTurn || !playWithAI) && !playerWins) {
+                            changePlayerTurn(i);
+                          }
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey)),
+                          height: 80,
+                          width: 80,
+                          child: Text(
+                            values[i],
+                            style: Theme.of(context).textTheme.headline4,
+                          ),
                         ),
-                      ),
-                    )),
+                      )),
+            ),
           ),
           SizedBox(
             height: 16,
