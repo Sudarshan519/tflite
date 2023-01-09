@@ -27,7 +27,6 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
-    const LivelinessDetection(),
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: AppStrings.FRONT),

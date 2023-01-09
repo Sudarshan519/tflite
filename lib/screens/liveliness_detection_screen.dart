@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:tflite/tflite.dart';
 
@@ -61,7 +60,12 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   }
 
   void checkAngle(AccelerometerEvent data) {
-    if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
+    if (x == data.x.round() &&
+        y == data.y.round() &&
+        z == data.z.round() &&
+        z > .5 &&
+        y > 8 &&
+        x < 1) {
       if (detectedBlinks.isNotEmpty) {
         // if (cameraImage != null) takePicture(cameraImage);
       }
@@ -76,11 +80,12 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
   /// clear blinks
   clearBlinks() {
     eye = "";
-    Future.delayed(1.seconds, () {
-      eyesClosed = false;
-      detected = false;
-      if (mounted) setState(() {});
-    });
+    // Future.delayed(1.seconds, () {
+    eyesClosed = false;
+    detected = false;
+    if (kDebugMode) print("CLOSED CLEAR BLINK");
+    if (mounted) setState(() {});
+    // });
     detected = false;
     detectedBlinks.clear();
     setState(() {});
@@ -98,7 +103,7 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
   /// take picture
   takePicture(cameraImage) async {
-    // loading = true;
+    // loading = true;t
 
     // image = await convertYUV420toImageColor(cameraImage);
     // cameraController.dispose();
@@ -134,6 +139,10 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
     });
   }
 
+  /// IMAGE
+  ///
+  ///
+
   // runModelOnImage() async {
   //   var image = await ImagePicker().pickImage(source: ImageSource.gallery);
   //   var predictions = await Tflite.runModelOnImage(path: image!.path);
@@ -157,8 +166,8 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
           child: Stack(children: [
             if (cameraInitialized)
               Center(child: CameraPreview(cameraController)),
-            Text(
-              "KEEP YOUR HAND STEADY WHILE BLINKING TWICE",
+            const Text(
+              "KEEP YOUR HAND STEADY WHILE BLINKING",
               style: TextStyle(
                   shadows: [Shadow(color: Colors.green, offset: Offset(1, 1))]),
             ),
@@ -178,15 +187,15 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
                       ),
               ),
             ),
-            if (detected)
-              Center(
-                child: SizedBox(
-                    height: 304,
-                    width: 304,
-                    child: Image.asset(eyesClosed
-                        ? "assets/images/face_mark_eyes_close.webp"
-                        : "assets/images/face_mark_eyes_open.webp")),
-              ),
+            // if (detected)
+            // Center(
+            //   child: SizedBox(
+            //       height: 304,
+            //       width: 304,
+            //       child: Image.asset(eyesClosed
+            //           ? "assets/images/face_mark_eyes_close.webp"
+            //           : "assets/images/face_mark_eyes_open.webp")),
+            // ),
             // if (detected)
             //   Text(
             //     eyesClosed ? "EYES CLOSED" : "EYES OPEN",
@@ -248,23 +257,28 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
       predictionTime = currentTimeStamp - timeStamp;
 
       var element = predictions!.first;
-      print(element);
+      if (kDebugMode) print(element);
 
       // if (element != detectedBlinks.last) {
       //   detected = true;
       // }
-      if (element['index'] == 0) {
-        detected = true;
-        eyesOpen = true;
-        if (mounted) setState(() {});
-      } else if (element['index'] == 1) {
-        if (eyesOpen) {
+      if (element['confidence'] > .70) {
+        if (element['index'] == 0) {
           detected = true;
-          addBlink(element);
+          eyesOpen = true;
+          if (mounted) setState(() {});
+        } else {
+          if (element['index'] == 1) {
+            if (eyesOpen) {
+              detected = true;
+
+              addBlink(element);
+            }
+          } else {
+            detected = false;
+            if (mounted) setState(() {});
+          }
         }
-      } else {
-        detected = false;
-        if (mounted) setState(() {});
       }
 
       {
@@ -357,8 +371,9 @@ class _LivelinessDetectionState extends State<LivelinessDetection> {
 
   void addBlink(element) {
     controller.blinks = controller.blinks + 1;
+    if (kDebugMode) print(detectedBlinks);
     detectedBlinks.add(element);
-    if (detectedBlinks.length > 2) {
+    if (detectedBlinks.length > 1) {
       takePicture(image);
     } else {
       detectedBlinks.add(element);
