@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -10,6 +9,7 @@ import 'package:flutter_pkg/utils/img_utils.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
+
 class FaceDetection extends StatefulWidget {
   const FaceDetection({Key? key}) : super(key: key);
 
@@ -59,11 +59,7 @@ class _FaceDetectionState extends State<FaceDetection> {
 
   loadModel() async {
     await Tflite.loadModel(
-        model: TModels.SELFIE_MODEL
-        // "assets/face/model_unquant.tflite",
-        // 'assets/model_face.tflite'
-        ,
-        labels: 'assets/labels_face.txt');
+        model: TModels.SELFIE_MODEL, labels: TModels.SELFIE_LABEL);
 
     modelReady = true;
     setState(() {});
@@ -111,47 +107,21 @@ class _FaceDetectionState extends State<FaceDetection> {
     );
     isPredicting = false;
     var element = predictions!.first;
-    // for (var element in predictions!)
-    {
-      if (element['confidence'] > .80 &&
-          element['label'] == "0 Face Detected") {
-        faceDetected = true;
-        cameraImage = image;
-        // if (!timerInitialized) {
-        //   timer = Timer.periodic(const Duration(seconds: 2), (t) {
-        //     if (faceDetected) {
-        //       if (value == 2) {
-        //         if (!captured) takePicture(image);
-        //         t.cancel();
-        //         timer.cancel();
-        //       } else {
-        //         value++;
-        //         if (mounted) setState(() {});
-        //       }
-        //     } else {
-        //       t.cancel();
-        //       timer.cancel();
-        //       value = 0;
-        //     }
-        //   });
-        // } else {
-        //   if (timerInitialized && captured) {
-        //     timer.cancel();
-        //   }
-        // }
-        if (mounted) setState(() {});
-      } else {
-        if (timerInitialized) timer.cancel();
-        value = 5;
-        if (faceDetected) faceDetected = false;
-        if (mounted) setState(() {});
-      }
+    if (element['confidence'] > .80 && element['label'] == "0 Face Detected") {
+      faceDetected = true;
+      cameraImage = image;
+
+      if (mounted) setState(() {});
+    } else {
+      if (timerInitialized) timer.cancel();
+      value = 5;
+      if (faceDetected) faceDetected = false;
+      if (mounted) setState(() {});
     }
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     cameraController.dispose();
   }
@@ -181,17 +151,6 @@ class _FaceDetectionState extends State<FaceDetection> {
                       width: 380,
                     ),
             )
-          // Center(
-          //   child: Container(
-          //     decoration: BoxDecoration(
-          //       border: Border.all(
-          //           width: 2, color: faceDetected ? Colors.green : Colors.grey),
-          //     ),
-          //     height: 404,
-          //     width: 304,
-          //     child: Text(value.toString()),
-          //   ),
-          // )
           else
             loading
                 ? const CircularProgressIndicator()

@@ -44,7 +44,7 @@ class _DocumentConfirmationState extends State<DocumentConfirmation> {
                     width: 320,
                     fit: BoxFit.fill,
                   ),
-                  // Text(controller.frontImageByte.value.substring(0, 100)),
+
                   const SizedBox(
                     height: 20,
                   ),
@@ -55,7 +55,7 @@ class _DocumentConfirmationState extends State<DocumentConfirmation> {
                   const SizedBox(
                     height: 10,
                   ),
-                  // Text(controller.backImageByte.value.substring(0, 100)),
+
                   Image.file(
                     File(controller.backImage.value),
                     height: 200,
@@ -78,7 +78,7 @@ class _DocumentConfirmationState extends State<DocumentConfirmation> {
                     width: 320,
                     fit: BoxFit.fill,
                   ),
-                  // Text(controller.tiltedByte.value.substring(0, 100)),
+              
                   const SizedBox(
                     height: 20,
                   ),
