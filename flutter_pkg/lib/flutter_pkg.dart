@@ -23,7 +23,7 @@ class DocumentVerification extends StatefulWidget {
 
 class _DocumentVerificationState extends State<DocumentVerification> {
   final MainController mainController = Get.put(MainController());
-  var pages = [
+  final pages = [
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: AppStrings.FRONT),
@@ -42,21 +42,11 @@ class _DocumentVerificationState extends State<DocumentVerification> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return PageView.builder(
         physics: const NeverScrollableScrollPhysics(),
         controller: mainController.pageController,
         itemCount: pages.length,
         itemBuilder: (_, i) => pages[i]);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 void main(List<String> args) {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: TicTacToe(),
   ));
 }
@@ -50,7 +50,7 @@ class _TicTacToeState extends State<TicTacToe> {
     }
     var isGameOver = values.firstWhere((element) => element == "",
         orElse: () => "GAME OVER");
-    print(isGameOver);
+
     if (isGameOver == "GAME OVER" && !playerWins) {
       await showDialog(
           context: context,
@@ -131,12 +131,12 @@ class _TicTacToeState extends State<TicTacToe> {
                       )),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Text(
               "Player ${playerWins ? "${playerTurn ? "B" : "A"} Wins" : playerTurn ? "A Turn" : "B Turn"} "),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Row(
@@ -151,7 +151,7 @@ class _TicTacToeState extends State<TicTacToe> {
               const Text("Play with AI")
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
         ],

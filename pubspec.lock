@@ -146,6 +146,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  flutter_pkg:
+    dependency: "direct main"
+    description:
+      path: flutter_pkg
+      relative: true
+    source: path
+    version: "0.0.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -469,27 +476,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
-  tflite_flutter:
-    dependency: "direct main"
-    description:
-      name: tflite_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.9.0"
-  tflite_flutter_helper:
-    dependency: "direct main"
-    description:
-      name: tflite_flutter_helper
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.1"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
@@ -504,6 +490,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  vibration:
+    dependency: "direct main"
+    description:
+      name: vibration
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.7.6"
   win32:
     dependency: transitive
     description:

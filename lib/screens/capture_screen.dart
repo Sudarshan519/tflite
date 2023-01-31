@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_face_verification/const/strings.dart';
 import 'package:flutter_face_verification/img_utils.dart';
+import 'package:flutter_face_verification/screens/liveliness_ml_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:flutter_face_verification/controller.dart';
@@ -61,16 +62,8 @@ class _CaptureImageState extends State<CaptureImage> {
       cameraController.startImageStream(runModelOnAvailableImage);
     }
 
-    // print(cameraController.value.aspectRatio.toString() + "ASPECT RATIO");
     setState(() {});
   }
-
-  // resetCamera() {
-  //   timer = Timer.periodic(10.seconds, (timer) {
-  //     cameraController.dispose();
-  //     if (mounted) getAvailableCamera();
-  //   });
-  // }
 
   runModelOnAvailableImage(cameraImage) {
     image = cameraImage;
@@ -91,7 +84,7 @@ class _CaptureImageState extends State<CaptureImage> {
     var path = widget.type == AppStrings.FRONT
         ? TModels.FRONT_MODEL
         : widget.type == AppStrings.BACK
-            ? 'assets/back/model_unquant.tflite'
+            ? 'assets/back_rc/model_unquant.tflite'
             : widget.type == AppStrings.TILTED
                 ? 'assets/tilted/model_unquant.tflite'
                 : 'assets/model_unquant.tflite';
@@ -217,7 +210,7 @@ class _CaptureImageState extends State<CaptureImage> {
 
   startTimer() {
     if (!timerInitialized) {
-      timer = Timer.periodic(2.seconds, (t) {
+      timer = Timer.periodic(500.milliseconds, (t) {
         if (value > 2) {
           takePicture(image);
           timer.cancel();
@@ -247,104 +240,6 @@ class _CaptureImageState extends State<CaptureImage> {
       z = data.z.round();
       clearDetection();
     }
-
-    /// CHECK FOR PHONE DIRECTION
-    ///
-    ///
-    // if (x == 0 && y == 9 && z == 0) {
-    //   if (phone != "portrait") {
-    //     // if (!timerInitialized) {
-    //     //   startTimer();
-    //     // }
-    //     setState(() {
-    //       phone = "portrait";
-    //     });
-    //   }
-    //   print("portrait");
-    //   if (isCapturing) return;
-    // } else if (x == 0 && y == 0 && (z) > 9) {
-    //   // if (!timerInitialized) {
-    //   //   startTimer();
-    //   // }
-    //   // print("protraint 1");
-    //   if (phone != "portrait") {
-    //     phone = "portrait";
-    //     setState(() {});
-    //   }
-    //   // print("portrait");
-    //   if (isCapturing) return;
-    // } else if (x == 0 && y == 7 && z == 0) {
-    //   if (widget.type == "TiltedImage") {
-    //     if (!timerInitialized) {
-    //       startTimer();
-    //     }
-    //   }
-    //   if (phone != "45 degree") {
-    //     isCapturing = true;
-    //     setState(() {
-    //       phone = "45 degree";
-    //     });
-    //   }
-
-    //   if (isCapturing) return;
-    // } else if (x == 0 && y == 7 && z == 7) {
-    //   if (widget.type == "TiltedImage") {
-    //     if (!timerInitialized) {
-    //       startTimer();
-    //     }
-    //   }
-    //   // print("45 degree 1");
-    //   if (phone != "45 degree") {
-    //     isCapturing = true;
-    //     setState(() {
-    //       phone = "45 degree";
-    //     });
-    //   }
-    // } else {
-    //   // resetTimer();
-    //   // if (label != "Failed detection") {
-    //   setState(() {
-    //     phone = "";
-    //   });
-    //   // }
-    //   // print("Failed detection");
-
-    // }
-
-    /// CHECK FOR PHONE ANGLE
-    /// Using x y and z from accelerometer, calculate x and y angles
-    // double x_val, y_val, z_val, result;
-    // double x2, y2, z2; //24 bitshort long
-
-    // //  // Lets get the deviations from our baseline
-    // var accel_center_x = 0;
-    // var accel_center_y = 0;
-    // var accel_center_z = 10;
-    // var accel_value_x = data.x;
-    // var accel_value_z = data.z;
-    // var accel_value_y = data.y;
-    // x_val = accel_value_x - accel_center_x;
-
-    // var accel_angle_x, accel_angle_y;
-    // y_val = accel_value_y - accel_center_y;
-    // z_val = accel_value_z - accel_center_z;
-
-    // //  // Work out the squares
-    // x2 = (x_val * x_val);
-    // y2 = (y_val * y_val);
-    // z2 = (z_val * z_val);
-
-    // //  //X Axis
-    // result = sqrt(y2 + z2);
-    // result = x_val / result;
-    // accel_angle_x = atan(result);
-
-    // //  //Y Axis
-    // result = sqrt(x2 + z2);
-    // result = y_val / result;
-    // accel_angle_y = atan(result);
-    // print(accel_angle_x);
-    // print(accel_angle_y);
   }
 
   @override
@@ -374,41 +269,15 @@ class _CaptureImageState extends State<CaptureImage> {
                   ? controller.tilted(file.path)
                   : controller.selfie(file.path);
       timer.cancel();
+      vibrate();
       controller.nextPage();
     }
-
-    ///TODO:CAMERA TAKE PICTURE USING CAMERA INBUILT FUNCTION
-    ///
-    /// camera controller when stream disabled
-    // await cameraController.takePicture().then((image) {
-    //   if (widget.type == "FrontCapture") {
-    //     controller.frontImage(image.path);
-    //     controller.pageController
-    //         .nextPage(duration: 200.milliseconds, curve: Curves.ease);
-    //   } else if (widget.type == "BackCapture") {
-    //     controller.backImage(image.path);
-    //     controller.nextPage();
-    //   } else if (widget.type == "TiltedImage") {
-    //     controller.tilted(image.path);
-    //     controller.nextPage();
-    //   } else {
-    //     _streamSubscriptions.map((e) {
-    //       e.cancel();
-    //     });
-    //     setState(() {});
-
-    //     controller.selfie(image.path);
-    //     controller.pageController
-    //         .nextPage(duration: 200.milliseconds, curve: Curves.ease);
-    //   }
-    // });
   }
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      // DeviceOrientation.landscapeRight,
     ]);
     return Scaffold(
       body: SafeArea(
@@ -416,6 +285,7 @@ class _CaptureImageState extends State<CaptureImage> {
           color: Colors.black,
           child: Stack(alignment: Alignment.center, children: [
             if (isInitialized)
+
               // Center(
               //   child: AspectRatio(
               //     aspectRatio: 1 / .6,
@@ -441,7 +311,6 @@ class _CaptureImageState extends State<CaptureImage> {
     );
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.paused:
@@ -476,11 +345,11 @@ class BoundingBox extends StatelessWidget {
       child: Transform(
         transform: Matrix4.identity()
           ..setEntry(3, 2, .01)
-          ..rotateX(widget.type == AppStrings.TILTED ? -.18 : 0),
+          ..rotateX(widget.type == AppStrings.TILTED ? -.15 : 0),
         alignment: FractionalOffset.center,
         child: Container(
-          height: 200,
-          width: 300,
+          height: 230,
+          width: 340,
           decoration: BoxDecoration(
               color: Colors.transparent,
               border: Border.all(

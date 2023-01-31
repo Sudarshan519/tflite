@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_face_verification/const/strings.dart';
 import 'package:flutter_face_verification/controller.dart';
 import 'package:flutter_face_verification/screens/capture_screen.dart';
+import 'package:flutter_face_verification/screens/face_detectionMLKit.dart';
 import 'package:flutter_face_verification/screens/face_detection_screen.dart';
 import 'package:flutter_face_verification/screens/introductions_screen.dart';
 import 'package:flutter_face_verification/screens/liveliness_detection_screen.dart';
+import 'package:flutter_face_verification/screens/liveliness_ml_kit.dart';
 import 'package:get/get.dart';
 
 class DocuemntProcessScreen extends StatefulWidget {
@@ -27,20 +29,23 @@ class _DocuemntProcessScreenState extends State<DocuemntProcessScreen> {
       ? Get.find()
       : Get.put(MainController());
   List<Widget> pages = [
+    // const FaceDetectionMlKit(), const Confirmation(type: AppStrings.SELFIE),
     const IntroScreen(),
     const IntroSecond(),
     const Tutorial(title: AppStrings.FRONT),
     const CaptureImage(type: AppStrings.FRONT),
     const Confirmation(type: AppStrings.FRONT),
-    const Tutorial(title: AppStrings.BACK),
-    const CaptureImage(type: AppStrings.BACK),
-    const Confirmation(type: AppStrings.BACK),
     const Tutorial(title: AppStrings.TILTED),
     const CaptureImage(type: AppStrings.TILTED),
     const Confirmation(type: AppStrings.TILTED),
-    const FaceDetection(),
+    const Tutorial(title: AppStrings.BACK),
+    const CaptureImage(type: AppStrings.BACK),
+    const Confirmation(type: AppStrings.BACK),
+
+    const FaceDetectionMlKit(),
     const Confirmation(type: AppStrings.SELFIE),
-    const LivelinessDetection(),
+
+    const LivelinessMlKit(),
     const DocumentConfirmation()
   ];
 

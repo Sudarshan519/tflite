@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
-import 'package:image/image.dart' as imageLib;
+import 'package:image/image.dart' as imglib;
 import 'package:path_provider/path_provider.dart';
 
 /// ImageUtils
 class ImageUtils {
-  /// Converts a [CameraImage] in YUV420 format to [imageLib.Image] in RGB format
-  static imageLib.Image? convertCameraImage(CameraImage cameraImage) {
+  /// Converts a [CameraImage] in YUV420 format to [imglib.Image] in RGB format
+  static imglib.Image? convertCameraImage(CameraImage cameraImage) {
     if (cameraImage.format.group == ImageFormatGroup.yuv420) {
       return convertYUV420ToImage(cameraImage);
     } else if (cameraImage.format.group == ImageFormatGroup.bgra8888) {
@@ -17,23 +17,23 @@ class ImageUtils {
     }
   }
 
-  /// Converts a [CameraImage] in BGRA888 format to [imageLib.Image] in RGB format
-  static imageLib.Image convertBGRA8888ToImage(CameraImage cameraImage) {
-    imageLib.Image img = imageLib.Image.fromBytes(cameraImage.planes[0].width!,
+  /// Converts a [CameraImage] in BGRA888 format to [imglib.Image] in RGB format
+  static imglib.Image convertBGRA8888ToImage(CameraImage cameraImage) {
+    imglib.Image img = imglib.Image.fromBytes(cameraImage.planes[0].width!,
         cameraImage.planes[0].height!, cameraImage.planes[0].bytes,
-        format: imageLib.Format.bgra);
+        format: imglib.Format.bgra);
     return img;
   }
 
-  /// Converts a [CameraImage] in YUV420 format to [imageLib.Image] in RGB format
-  static imageLib.Image convertYUV420ToImage(CameraImage cameraImage) {
+  /// Converts a [CameraImage] in YUV420 format to [imglib.Image] in RGB format
+  static imglib.Image convertYUV420ToImage(CameraImage cameraImage) {
     final int width = cameraImage.width;
     final int height = cameraImage.height;
 
     final int uvRowStride = cameraImage.planes[1].bytesPerRow;
     final int uvPixelStride = cameraImage.planes[1].bytesPerPixel!;
 
-    final image = imageLib.Image(width, height);
+    final image = imglib.Image(width, height);
 
     for (int w = 0; w < width; w++) {
       for (int h = 0; h < height; h++) {
@@ -69,8 +69,8 @@ class ImageUtils {
         (r & 0xff);
   }
 
-  static void saveImage(imageLib.Image image, [int i = 0]) async {
-    List<int> jpeg = imageLib.JpegEncoder().encodeImage(image);
+  static void saveImage(imglib.Image image, [int i = 0]) async {
+    List<int> jpeg = imglib.JpegEncoder().encodeImage(image);
     final appDir = await getTemporaryDirectory();
     final appPath = appDir.path;
     final fileOnDevice = File('$appPath/out$i.jpg');

@@ -42,3 +42,36 @@ class MainScreen extends StatelessWidget {
     );
   }
 }
+
+class FrontDocumentVerification extends StatefulWidget {
+  // const FrontDocumentVerification({Key? key}) : super(key: key); ///Default Constructor
+  FrontDocumentVerification._internal();
+  final PageController pageController = PageController();
+  static final FrontDocumentVerification instance =
+      FrontDocumentVerification._internal();
+
+  factory FrontDocumentVerification() => instance;
+  @override
+  State<FrontDocumentVerification> createState() =>
+      _FrontDocumentVerificationState();
+}
+
+class _FrontDocumentVerificationState extends State<FrontDocumentVerification> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class NewWidget extends StatelessWidget {
+  const NewWidget({Key? key}) : super(key: key);
+  void updateAppState() {
+    FrontDocumentVerification.instance.pageController
+        .nextPage(duration: 300.milliseconds, curve: Curves.ease);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}

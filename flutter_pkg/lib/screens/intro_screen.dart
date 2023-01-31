@@ -123,7 +123,6 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 }
 
-
 class IntroSecond extends StatelessWidget {
   const IntroSecond({Key? key}) : super(key: key);
 

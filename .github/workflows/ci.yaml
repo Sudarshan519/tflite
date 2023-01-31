@@ -62,7 +62,8 @@ jobs:
       #   id: folderId
       #   with:
       #     cond: ${{ steps.branch.outputs.branch == 'main' }}
-      - run: flutter build apk
+      # - run: flutter build apk
+      - run: flutter build apk -t lib/package.dart
       - name: Archive Files
         run: |
           sudo apt-get install zip

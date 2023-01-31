@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_face_verification/img_utils.dart';
-import 'package:flutter_face_verification/const/strings.dart';
-import 'package:flutter_face_verification/controller.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tflite/tflite.dart';
+
+import 'package:flutter_face_verification/const/strings.dart';
+import 'package:flutter_face_verification/controller.dart';
+import 'package:flutter_face_verification/img_utils.dart';
 
 class FaceDetection extends StatefulWidget {
   const FaceDetection({Key? key}) : super(key: key);

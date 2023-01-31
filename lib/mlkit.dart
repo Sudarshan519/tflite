@@ -12,7 +12,7 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   cameras = await availableCameras();
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: MLKIT(),
   ));
 }
@@ -125,7 +125,7 @@ class FaceDetectorPainter extends CustomPainter {
 enum ScreenMode { liveFeed, gallery }
 
 class CameraView extends StatefulWidget {
-  CameraView(
+  const CameraView(
       {Key? key,
       required this.title,
       required this.customPaint,
