@@ -3,6 +3,7 @@ library flutter_pkg;
 import 'package:flutter/material.dart';
 import 'package:flutter_pkg/const/strings.dart';
 import 'package:flutter_pkg/controller/main_controller.dart';
+import 'package:flutter_pkg/repo/shared_preferences.dart';
 import 'package:flutter_pkg/screens/capture.dart';
 import 'package:flutter_pkg/screens/confirmation.dart';
 import 'package:flutter_pkg/screens/face_detectionMLKit.dart';
@@ -23,6 +24,7 @@ class DocumentVerification extends StatefulWidget {
 
 class _DocumentVerificationState extends State<DocumentVerification> {
   final MainController mainController = Get.put(MainController());
+
   final pages = [
     const IntroScreen(),
     const IntroSecond(),

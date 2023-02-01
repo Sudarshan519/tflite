@@ -46,6 +46,7 @@ class MainController extends GetxController {
 
   convertImage() {
     frontImageByte(convertToByte64(frontImage.value));
+    print(frontImage.value);
     backImageByte(convertToByte64(backImage.value));
     tiltedByte(convertToByte64(tilted.value));
     selfieByte(convertToByte64(selfie.value));

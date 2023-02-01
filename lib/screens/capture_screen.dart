@@ -210,7 +210,7 @@ class _CaptureImageState extends State<CaptureImage> {
 
   startTimer() {
     if (!timerInitialized) {
-      timer = Timer.periodic(500.milliseconds, (t) {
+      timer = Timer.periodic(1.seconds, (t) {
         if (value > 2) {
           takePicture(image);
           timer.cancel();
@@ -233,7 +233,7 @@ class _CaptureImageState extends State<CaptureImage> {
 
   checkAngle(AccelerometerEvent data) {
     if (x == data.x.round() && y == data.y.round() && z == data.z.round()) {
-      if (timerInitialized) {}
+      // if (timerInitialized) {}
     } else {
       x = data.x.round();
       y = data.y.round();
@@ -348,8 +348,8 @@ class BoundingBox extends StatelessWidget {
           ..rotateX(widget.type == AppStrings.TILTED ? -.15 : 0),
         alignment: FractionalOffset.center,
         child: Container(
-          height: 230,
-          width: 340,
+          height: widget.type == AppStrings.TILTED ? 200 : 230,
+          width: widget.type == AppStrings.TILTED ? 300 : 340,
           decoration: BoxDecoration(
               color: Colors.transparent,
               border: Border.all(
@@ -357,12 +357,12 @@ class BoundingBox extends StatelessWidget {
                           phone == 'portrait' ||
                           phone == '45 degree')
                       ? 3
-                      : 1.5,
+                      : 2,
                   color: (phone == 'portrait' || phone == '45 degree')
                       ? Colors.green
                       : label != ""
                           ? Colors.green
-                          : Colors.grey)),
+                          : Colors.white)),
         ),
       ),
     );

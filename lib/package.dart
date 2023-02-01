@@ -18,9 +18,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  var result; 
+  var result;
   @override
   Widget build(BuildContext context) {
+    // print(result['front'].length);
+    // log(result['front']);
+    // print((4 * ((result['front'].length / 3) * 0.5624896334383812).ceil()) /
+    //     1000);
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(

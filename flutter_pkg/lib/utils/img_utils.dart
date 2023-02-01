@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:image/image.dart' as imglib;
 import 'package:camera/camera.dart';
+
 const shift = (0xFF << 24);
 convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
   try {
@@ -34,7 +35,11 @@ convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
       }
     }
 
-    if (Platform.isAndroid) img = imglib.copyRotate(img, rotate ? -90 : 90);
+    if (Platform.isAndroid) {
+      img = imglib.copyRotate(img, rotate ? -90 : 90);
+      //  if (Platform.isAndroid) img = imglib.copyRotate(img, rotate ? -90 : 90);
+
+    }
 
     ///trim rect
     if (!rotate) {
@@ -73,6 +78,8 @@ convertYUV420toImageColor(CameraImage image, {bool rotate = false}) async {
       // img = imglib.copyCrop(img, offSetX, offSetY, cropSizeX, cropSizeY);
 
       img = imglib.copyCrop(img, 40, 180, 420, 300);
+    } else {
+      img = imglib.flipHorizontal(img);
     }
 
     imglib.PngEncoder pngEncoder = imglib.PngEncoder(level: 0, filter: 0);

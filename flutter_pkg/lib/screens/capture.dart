@@ -215,9 +215,9 @@ class _CaptureImageState extends State<CaptureImage> {
 
   startTimer() {
     if (!timerInitialized) {
-      timer = Timer.periodic(1.seconds, (t) {
+      timer = Timer.periodic(500.milliseconds, (t) {
         if (value > 2) {
-          takePicture(image);
+ ti         takePicture(image);
           timer.cancel();
         } else {
           value++;
@@ -351,11 +351,13 @@ class BoundingBox extends StatelessWidget {
       child: Transform(
         transform: Matrix4.identity()
           ..setEntry(3, 2, .01)
-          ..rotateX(widget.type == AppStrings.TILTED ? -.15 : 0),
+          ..rotateX(widget.type == AppStrings.TILTED ? -.14 : 0),
         alignment: FractionalOffset.center,
         child: Container(
-          height: 230,
-          width: 340,
+          // height: 230,
+          // width: 340,
+          height: widget.type == AppStrings.TILTED ? 200 : 230,
+          width: widget.type == AppStrings.TILTED ? 320 : 340,
           decoration: BoxDecoration(
               color: Colors.transparent,
               border: Border.all(
@@ -363,12 +365,12 @@ class BoundingBox extends StatelessWidget {
                           phone == 'portrait' ||
                           phone == '45 degree')
                       ? 3
-                      : 1.5,
+                      : 2,
                   color: (phone == 'portrait' || phone == '45 degree')
                       ? Colors.green
                       : label != ""
                           ? Colors.green
-                          : Colors.grey)),
+                          : Colors.white)),
         ),
       ),
     );

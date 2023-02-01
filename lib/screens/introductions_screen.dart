@@ -29,9 +29,9 @@ class _IntroScreenState extends State<IntroScreen> {
               const SizedBox(height: 40),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     // borderRadius: BorderRadius.circular(30),
-                    color: const Color.fromRGBO(84, 182, 234, 1)),
+                    color: Color.fromRGBO(84, 182, 234, 1)),
                 child: Text(
                   "Three types of identity verification documents will be taken.",
                   style: Theme.of(context)
